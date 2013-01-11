@@ -22,22 +22,32 @@ package makarevich.test1
 import android.app.Activity
 import android.os.Bundle
 
+import android.graphics.Color
+import android.graphics.drawable._
 import android.view._
-
 import android.widget._
 
 private class DataList(ctxt: Activity) extends BaseAdapter {
+  private val color_count = ctxt.getResources.getInteger(R.integer.color_count)
+
   def getItem(i: Int) = null
   def getItemId(i: Int) = 0
 
-  def getCount = 100
+  def getCount = color_count
 
   def getView(i: Int, another: View, parent: ViewGroup): View = {
-    val btn = ctxt.getLayoutInflater.inflate(R.layout.main_item, null)
+    val item = ctxt.getLayoutInflater.inflate(R.layout.main_item, null)
 
-    btn.asInstanceOf[Button].setText(i.toString)
+    val col = Color.HSVToColor(Array[Float](360 * i.toFloat / color_count, 1, 1))
 
-    btn
+    val im = item.findViewById(R.id.image_view).asInstanceOf[ImageView]
+    val te = item.findViewById(R.id.text_view).asInstanceOf[TextView]
+
+    im.setBackgroundColor(col)
+
+    te.setText(col.toString)
+
+    item
   }
 
 }

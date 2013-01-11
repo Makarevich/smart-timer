@@ -19,25 +19,7 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  >
-
-  <ImageView
-    android:id="@+id/image_view"
-    android:layout_width="@dimen/color_box_size"
-    android:layout_height="@dimen/color_box_size"
-    android:scaleType="fitXY"
-    />
-
-  <TextView
-    android:id="@+id/text_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    />
-      
-
-</LinearLayout>
+<resources>
+    <dimen name="color_box_size">60dp</dimen>
+    <integer name="color_count">8</integer>
+</resources>
