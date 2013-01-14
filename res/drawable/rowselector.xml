@@ -19,10 +19,12 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-    <dimen name="color_box_size">60dp</dimen>
-    <integer name="color_count">8</integer>
-
-    <color name="orange">#333</color>
-    <color name="black">#000</color>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+        <!--
+        android:state_checked="true"
+        -->
+    <item
+        android:state_selected="true"
+        android:drawable="@color/orange"
+        />
+</selector>

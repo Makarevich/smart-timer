@@ -21,6 +21,7 @@ package makarevich.test1
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 
 import android.graphics.Color
 import android.graphics.drawable._
@@ -55,8 +56,10 @@ private class DataList(ctxt: Activity) extends BaseAdapter {
     builder.result
   }
 
+  /*
   override def areAllItemsEnabled = false
   override def isEnabled(pos: Int) = if(pos == 3) false else super.isEnabled(pos)
+  */
 
   def getItem(i: Int) = null
   def getItemId(i: Int) = 0
@@ -68,6 +71,12 @@ private class DataList(ctxt: Activity) extends BaseAdapter {
   }
 
   //////
+
+  def dump_selected {
+    val s = views map { _ isSelected }
+
+    Log.v("Test", "Data selected: " + s.mkString(", "))
+  }
 
   def deleteItem(pos: Int) {
 
@@ -91,10 +100,31 @@ class Main extends Activity {
     list.setAdapter(data_set)
     
     list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE)
+
     list.setOnItemClickListener(new AdapterView.OnItemClickListener {
       override def onItemClick (parent: AdapterView[_], view: View, pos: Int, id: Long) {
-        //list.setItemChecked(pos, true)
-        data_set.deleteItem(pos)
+        view.setSelected(list.isItemChecked(pos))
+
+        Log.v("Test", "Item at " + pos + " is " +
+          (if(list.isItemChecked(pos)) "selected" else "not selected"))
+        /*
+        view.setBackgroundColor(getResources.getColor(
+          if(list.isItemChecked(pos)) R.color.orange else R.color.black
+          ))
+        */
+
+        //val b = list.isItemChecked(pos)
+        //list.setItemChecked(pos, ! list.isItemChecked(pos))
+        //data_set.deleteItem(pos)
+
+        val pp = list.getCheckedItemPositions
+
+        val poss = 0 to pp.size filter { pp valueAt _ } map { pp keyAt _ }
+
+        //Log.v("Test", "Bb: " + b)
+        Log.v("Test", "Selected: " + poss.mkString(", "))
+
+        data_set.dump_selected
       }
     })
   }
