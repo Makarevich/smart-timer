@@ -28,26 +28,53 @@ import android.view._
 import android.widget._
 
 private class DataList(ctxt: Activity) extends BaseAdapter {
-  private val color_count = ctxt.getResources.getInteger(R.integer.color_count)
+  import collection.mutable.Buffer
+
+  private val views: Buffer[View] = {
+    val color_count = ctxt.getResources.getInteger(R.integer.color_count)
+
+    val builder = Buffer.newBuilder[View]
+    
+    for {
+      i <- 0 to color_count
+    } {
+      val item = ctxt.getLayoutInflater.inflate(R.layout.main_item, null)
+
+      val col = Color.HSVToColor(Array[Float](360 * i.toFloat / color_count, 1, 1))
+
+      val im = item.findViewById(R.id.image_view).asInstanceOf[ImageView]
+      val te = item.findViewById(R.id.text_view).asInstanceOf[TextView]
+
+      im.setBackgroundColor(col)
+
+      te.setText(col.toString)
+
+      builder += item
+    }
+
+    builder.result
+  }
+
+  override def areAllItemsEnabled = false
+  override def isEnabled(pos: Int) = if(pos == 3) false else super.isEnabled(pos)
 
   def getItem(i: Int) = null
   def getItemId(i: Int) = 0
 
-  def getCount = color_count
+  def getCount = views.size
 
   def getView(i: Int, another: View, parent: ViewGroup): View = {
-    val item = ctxt.getLayoutInflater.inflate(R.layout.main_item, null)
+    views(i)
+  }
 
-    val col = Color.HSVToColor(Array[Float](360 * i.toFloat / color_count, 1, 1))
+  //////
 
-    val im = item.findViewById(R.id.image_view).asInstanceOf[ImageView]
-    val te = item.findViewById(R.id.text_view).asInstanceOf[TextView]
+  def deleteItem(pos: Int) {
 
-    im.setBackgroundColor(col)
+    views.remove(pos)
 
-    te.setText(col.toString)
 
-    item
+    notifyDataSetChanged
   }
 
 }
@@ -57,6 +84,18 @@ class Main extends Activity {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.main)
 
-    findViewById(R.id.list_view).asInstanceOf[ListView].setAdapter(new DataList(this))
+    val list = findViewById(R.id.list_view).asInstanceOf[ListView]
+
+    val data_set = new DataList(this)
+
+    list.setAdapter(data_set)
+    
+    list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE)
+    list.setOnItemClickListener(new AdapterView.OnItemClickListener {
+      override def onItemClick (parent: AdapterView[_], view: View, pos: Int, id: Long) {
+        //list.setItemChecked(pos, true)
+        data_set.deleteItem(pos)
+      }
+    })
   }
 }
