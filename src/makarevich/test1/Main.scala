@@ -86,6 +86,23 @@ private class DataList(ctxt: Activity) extends BaseAdapter {
     notifyDataSetChanged
   }
 
+  def uncheck_all {
+    views.foreach { _.asInstanceOf[Checkable].setChecked(false) }
+  }
+
+}
+
+private class TestMultiChoiceModeListener(data_set: DataList) extends AbsListView.MultiChoiceModeListener {
+  def onCreateActionMode(mode: ActionMode,x$2: Menu): Boolean = true
+  def onDestroyActionMode(mode: ActionMode): Unit = { data_set.uncheck_all }
+
+  def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
+  def onPrepareActionMode(mode: ActionMode,x$2: Menu): Boolean = false
+
+  def onItemCheckedStateChanged(mode: ActionMode, pos: Int, id: Long, checked: Boolean) {
+    Log.v("Test", "Item at " + pos + " is " +
+      (if(checked) "checked" else "not checked"))
+  }
 }
 
 class Main extends Activity {
@@ -99,32 +116,38 @@ class Main extends Activity {
 
     list.setAdapter(data_set)
     
-    list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE)
+    list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL)
+
+    list.setMultiChoiceModeListener(new TestMultiChoiceModeListener(data_set))
 
     list.setOnItemClickListener(new AdapterView.OnItemClickListener {
       override def onItemClick (parent: AdapterView[_], view: View, pos: Int, id: Long) {
-        view.setSelected(list.isItemChecked(pos))
-
+        /*
         Log.v("Test", "Item at " + pos + " is " +
           (if(list.isItemChecked(pos)) "selected" else "not selected"))
+        */
+
         /*
         view.setBackgroundColor(getResources.getColor(
           if(list.isItemChecked(pos)) R.color.orange else R.color.black
           ))
         */
 
-        //val b = list.isItemChecked(pos)
-        //list.setItemChecked(pos, ! list.isItemChecked(pos))
-        //data_set.deleteItem(pos)
+        // val b = list.isItemChecked(pos)
+        // list.setItemChecked(pos, ! list.isItemChecked(pos))
+
+
+        list.setItemChecked(pos, true)
+        Log.v("Test", "Checking item " + pos)
 
         val pp = list.getCheckedItemPositions
 
         val poss = 0 to pp.size filter { pp valueAt _ } map { pp keyAt _ }
 
-        //Log.v("Test", "Bb: " + b)
-        Log.v("Test", "Selected: " + poss.mkString(", "))
+        // Log.v("Test", "Bb: " + b)
+        Log.v("Test", "Checked: " + poss.mkString(", "))
 
-        data_set.dump_selected
+        //data_set.dump_selected
       }
     })
   }
