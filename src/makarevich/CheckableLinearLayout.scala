@@ -27,7 +27,6 @@ import android.widget.Checkable
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 
 import android.R
 
@@ -38,13 +37,10 @@ class CheckableLinearLayout(ctxt: Context, attr: AttributeSet)
   private[this] var flag: Boolean = false
 
   def isChecked: Boolean = flag
+  def toggle = setChecked(!flag)
   def setChecked(new_flag: Boolean): Unit = {
-    Log.v("CheckableLinearLayout", "setChecked(" + new_flag + ")")
     flag = new_flag
-  }
-  def toggle {
-    Log.v("CheckableLinearLayout", "toggle")
-    flag = ! flag
+    refreshDrawableState
   }
 
 
@@ -52,12 +48,7 @@ class CheckableLinearLayout(ctxt: Context, attr: AttributeSet)
 
   override protected def onCreateDrawableState(extraSpace: Int) = {
     val drawableState = super.onCreateDrawableState(extraSpace + 1)
-    if (isChecked) {
-      Log.v("CheckableLinearLayout", "onCreateDrawableState(state_checked)")
-      View.mergeDrawableStates(drawableState, Array(R.attr.state_checked))
-    } else {
-      Log.v("CheckableLinearLayout", "onCreateDrawableState()")
-    }
+    if (isChecked) View.mergeDrawableStates(drawableState, Array(R.attr.state_checked))
     drawableState
   }
 }

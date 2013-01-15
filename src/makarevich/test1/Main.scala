@@ -69,32 +69,11 @@ private class DataList(ctxt: Activity) extends BaseAdapter {
   def getView(i: Int, another: View, parent: ViewGroup): View = {
     views(i)
   }
-
-  //////
-
-  def dump_selected {
-    val s = views map { _ isSelected }
-
-    Log.v("Test", "Data selected: " + s.mkString(", "))
-  }
-
-  def deleteItem(pos: Int) {
-
-    views.remove(pos)
-
-
-    notifyDataSetChanged
-  }
-
-  def uncheck_all {
-    views.foreach { _.asInstanceOf[Checkable].setChecked(false) }
-  }
-
 }
 
-private class TestMultiChoiceModeListener(data_set: DataList) extends AbsListView.MultiChoiceModeListener {
+private class TestMultiChoiceModeListener extends AbsListView.MultiChoiceModeListener {
   def onCreateActionMode(mode: ActionMode,x$2: Menu): Boolean = true
-  def onDestroyActionMode(mode: ActionMode): Unit = { data_set.uncheck_all }
+  def onDestroyActionMode(mode: ActionMode): Unit = {}
 
   def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = false
   def onPrepareActionMode(mode: ActionMode,x$2: Menu): Boolean = false
@@ -118,7 +97,7 @@ class Main extends Activity {
     
     list.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL)
 
-    list.setMultiChoiceModeListener(new TestMultiChoiceModeListener(data_set))
+    list.setMultiChoiceModeListener(new TestMultiChoiceModeListener)
 
     list.setOnItemClickListener(new AdapterView.OnItemClickListener {
       override def onItemClick (parent: AdapterView[_], view: View, pos: Int, id: Long) {
