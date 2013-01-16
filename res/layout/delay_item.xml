@@ -1,4 +1,6 @@
-/*
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
     Copyright 2013 Yury Makarevich
 
     This file is part of Smart Timer.
@@ -15,31 +17,28 @@
 
     You should have received a copy of the GNU General Public License
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
-*/
+-->
 
-package makarevich.test1
 
-import android.app.Application
+<makarevich.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:background="@drawable/rowselector"
+  >
 
-import model._
-import collection.mutable.ArrayBuffer
+  <ImageView
+    android:id="@+id/image_view"
+    android:layout_width="@dimen/color_box_size"
+    android:layout_height="@dimen/color_box_size"
+    android:scaleType="fitXY"
+    />
 
-class MyApplication extends Application {
-  val model: DelayGroup = {
-    DelayGroup(1, ArrayBuffer(
-      DelayItem(10, 0),
-      DelayItem(20, 0),
-      DelayGroup(3, ArrayBuffer(
-        DelayItem(10, 0),
-        DelayGroup(5, ArrayBuffer(
-          DelayItem(20, 0),
-          DelayItem(20, 0),
-          DelayItem(20, 0)
-        )),
-        DelayItem(20, 0)
-      )),
-      DelayItem(10, 0)
-    ))
-  }
-}
+  <TextView
+    android:id="@+id/item_text_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    />
+      
 
+</makarevich.CheckableLinearLayout>

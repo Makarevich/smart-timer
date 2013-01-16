@@ -28,6 +28,69 @@ import android.graphics.drawable._
 import android.view._
 import android.widget._
 
+
+import model._
+
+class ListActivity extends Activity {
+  override def onCreate(savedInstanceState: Bundle) {
+    super.onCreate(savedInstanceState)
+
+    setContentView(R.layout.group_view)
+    val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
+
+    val model = getApplication.asInstanceOf[MyApplication].model
+
+    list_view.setAdapter(new GroupAdapter(this, model))
+  }
+
+  override def onSaveInstanceState (savedInstanceState: Bundle) {
+    super.onSaveInstanceState(savedInstanceState)
+  }
+}
+
+private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapter {
+  override def getViewTypeCount = 2
+  override def getItemViewType(pos: Int) = group.items(pos) match {
+    case _: DelayItem => 0
+    case _: DelayGroup => 1
+  }
+
+  /////
+
+  def getItemId(i: Int) = 0
+  def getItem(i: Int) = group.items(i)
+
+  def getCount = group.items.size
+
+  def getView(i: Int, another: View, parent: ViewGroup): View = {
+    def inflate(id: Int)(f: View => Unit): View = {
+      val view = ctxt.getLayoutInflater.inflate(id, null)
+      f(view)
+      view
+    }
+
+    group.items(i) match {
+      case item: DelayItem => inflate(R.layout.delay_item) { view =>
+        val im = view.findViewById(R.id.image_view).asInstanceOf[ImageView]
+        val tv = view.findViewById(R.id.item_text_view).asInstanceOf[TextView]
+
+        im.setBackgroundColor(item.color)
+        tv.setText(item.amount.toString)
+      }
+
+      case subgroup: DelayGroup => inflate(R.layout.delay_group_item) { view =>
+        val tv = view.findViewById(R.id.group_text_view).asInstanceOf[TextView]
+
+        tv.setText(subgroup.k.toString)
+      }
+    }
+  }
+}
+
+
+
+/*
+
 private class DataList(ctxt: Activity) extends BaseAdapter {
   import collection.mutable.Buffer
 
@@ -55,11 +118,6 @@ private class DataList(ctxt: Activity) extends BaseAdapter {
 
     builder.result
   }
-
-  /*
-  override def areAllItemsEnabled = false
-  override def isEnabled(pos: Int) = if(pos == 3) false else super.isEnabled(pos)
-  */
 
   def getItem(i: Int) = null
   def getItemId(i: Int) = 0
@@ -101,20 +159,6 @@ class Main extends Activity {
 
     list.setOnItemClickListener(new AdapterView.OnItemClickListener {
       override def onItemClick (parent: AdapterView[_], view: View, pos: Int, id: Long) {
-        /*
-        Log.v("Test", "Item at " + pos + " is " +
-          (if(list.isItemChecked(pos)) "selected" else "not selected"))
-        */
-
-        /*
-        view.setBackgroundColor(getResources.getColor(
-          if(list.isItemChecked(pos)) R.color.orange else R.color.black
-          ))
-        */
-
-        // val b = list.isItemChecked(pos)
-        // list.setItemChecked(pos, ! list.isItemChecked(pos))
-
 
         list.setItemChecked(pos, true)
         Log.v("Test", "Checking item " + pos)
@@ -131,3 +175,5 @@ class Main extends Activity {
     })
   }
 }
+
+*/
