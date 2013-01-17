@@ -31,6 +31,7 @@
     android:layout_width="@dimen/color_box_size"
     android:layout_height="@dimen/color_box_size"
     android:scaleType="fitXY"
+    android:background="@drawable/holo_05_content_email"
     />
 
   <TextView

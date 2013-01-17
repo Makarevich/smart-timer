@@ -20,6 +20,7 @@
 package makarevich.test1
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 
@@ -28,24 +29,83 @@ import android.graphics.drawable._
 import android.view._
 import android.widget._
 
+import annotation.tailrec
+
 
 import model._
 
 class ListActivity extends Activity {
+  private var intent_path: Array[Byte] = null
+
+  private val this_activity = this
+
+  private class InvalidModelPath extends Throwable
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
     setContentView(R.layout.group_view)
     val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
 
-    val model = getApplication.asInstanceOf[MyApplication].model
+    intent_path = getIntent.getByteArrayExtra(
+      ListActivity.IntentExtraModelPathByteArray
+    )
 
-    list_view.setAdapter(new GroupAdapter(this, model))
+    if(intent_path == null) intent_path = Array.empty[Byte]
+
+    val model_node = {
+      Log.v("intent_path", intent_path.mkString(","))
+
+      val model = getApplication.asInstanceOf[MyApplication].model
+
+      try {
+        if(intent_path == null) model else {
+          @tailrec def descend_model(path: List[Byte], group: DelayGroup): DelayGroup = {
+            if(path == Nil) group else {
+              val node = group.items(path.head)
+
+              if(node.isInstanceOf[DelayGroup])
+                descend_model(path.tail, node.asInstanceOf[DelayGroup])
+                else throw new InvalidModelPath
+            }
+          }
+          descend_model(intent_path.toList, model)
+        }
+      } catch { case e: InvalidModelPath =>
+        return finish()
+      }
+    }
+
+    list_view.setAdapter(new GroupAdapter(this, model_node))
+
+    list_view.setOnItemClickListener(new AdapterView.OnItemClickListener {
+      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+        val item_at_pos = parent.getItemAtPosition(pos)
+        
+        if(item_at_pos.isInstanceOf[DelayGroup]) {
+          val intent = new Intent(this_activity, this_activity.getClass)
+
+          val new_path: Array[Byte] = intent_path :+ pos.toByte
+
+          Log.v("onItemClick", "New path: " + new_path.mkString(", "))
+
+          intent.putExtra(
+            ListActivity.IntentExtraModelPathByteArray,
+            new_path
+          )
+          startActivity(intent)
+        }
+      }
+    })
   }
 
   override def onSaveInstanceState (savedInstanceState: Bundle) {
     super.onSaveInstanceState(savedInstanceState)
   }
+}
+
+object ListActivity {
+  private val IntentExtraModelPathByteArray = "MODEL_PATH"
 }
 
 private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapter {
