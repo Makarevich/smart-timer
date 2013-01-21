@@ -24,7 +24,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 
-import android.graphics.Color
+import android.graphics.{Color, Point}
 import android.graphics.drawable._
 import android.view._
 import android.widget._
@@ -78,25 +78,93 @@ class ListActivity extends Activity {
 
     list_view.setAdapter(new GroupAdapter(this, model_node))
 
-    list_view.setOnItemClickListener(new AdapterView.OnItemClickListener {
-      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
-        val item_at_pos = parent.getItemAtPosition(pos)
-        
-        if(item_at_pos.isInstanceOf[DelayGroup]) {
-          val intent = new Intent(this_activity, this_activity.getClass)
+    val listener = new AdapterView.OnItemClickListener with View.OnTouchListener {
+      private case class TouchData(
+        var   pos: Float,
+        var   width: Float)
 
-          val new_path: Array[Byte] = intent_path :+ pos.toByte
+      private val touch_point = TouchData(0, 0)
 
-          Log.v("onItemClick", "New path: " + new_path.mkString(", "))
+      def onTouch (v: View, event: MotionEvent): Boolean = {
+        if(event.getAction != MotionEvent.ACTION_DOWN) false else {
+          touch_point.pos = event.getX
+          touch_point.width = v.getWidth
+          Log.v("MotionEvent.ACTION_DOWN",
+            touch_point.pos.toString + "/" + touch_point.width.toString)
 
-          intent.putExtra(
-            ListActivity.IntentExtraModelPathByteArray,
-            new_path
-          )
-          startActivity(intent)
+          if(touch_point.pos * 3 <= touch_point.width * 2) false else {
+            // start drag&drop
+
+            val childs = list_view.getFirstVisiblePosition to list_view.getLastVisiblePosition map {
+              n => list_view.getChildAt(n)
+            }
+
+            val ey = event.getRawY
+
+            val selected_info = childs.map { ch =>
+              val loc = Array[Int](0, 0)
+              ch.getLocationOnScreen(loc)
+              (ch, loc(1), ch.getHeight)
+
+              // Log.v("onTouch", "Kid loc: " + (y, dy).toString)
+            } find {
+              case (ch, y, dy) => y <= ey && ey <= (y + dy)
+            }
+
+            // Log.v("onTouch", "Found a child: " + selected_child.toString)
+
+            if(selected_info.isEmpty) false else {
+              val (ch, y, dy) = selected_info.get
+
+              val shadow_x = event.getRawX.toInt
+              val shadow_y = (ey - y).toInt
+
+              val shadow_builder = new View.DragShadowBuilder(ch) {
+                override def onProvideShadowMetrics (sz: Point, pos: Point) {
+                  super.onProvideShadowMetrics(sz, pos)
+                  pos.set(shadow_x, shadow_y)
+                }
+              }
+
+              val result = ch.startDrag(null, shadow_builder, null, 0)
+              Log.v("view.startDrag", result.toString)
+
+              true
+            }
+          }
         }
       }
-    })
+
+      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+
+        if(touch_point.pos * 3 < touch_point.width) {
+          // display item configuration
+
+          val item_at_pos = parent.getItemAtPosition(pos)
+          
+          if(item_at_pos.isInstanceOf[DelayGroup]) {
+            val intent = new Intent(this_activity, this_activity.getClass)
+
+            val new_path: Array[Byte] = intent_path :+ pos.toByte
+
+            Log.v("onItemClick", "New path: " + new_path.mkString(", "))
+
+            intent.putExtra(
+              ListActivity.IntentExtraModelPathByteArray,
+              new_path
+            )
+            startActivity(intent)
+          }
+        }else if(touch_point.pos * 3 > touch_point.width * 2) {
+          // drag&drop is started onTouch
+        }else{
+          // start selection
+        }
+      }
+    }
+
+    list_view.setOnItemClickListener(listener)
+    list_view.setOnTouchListener(listener)
   }
 
   override def onSaveInstanceState (savedInstanceState: Bundle) {
