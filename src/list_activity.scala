@@ -102,6 +102,25 @@ class ListActivity extends Activity {
   override def onSaveInstanceState (savedInstanceState: Bundle) {
     super.onSaveInstanceState(savedInstanceState)
   }
+
+  override def onCreateOptionsMenu(menu: Menu) = {
+    getMenuInflater.inflate(R.menu.action_bar, menu)
+    true
+  }
+
+  override def onOptionsItemSelected(item: MenuItem) = {
+    def toast(text: String): Boolean = {
+      Toast.makeText(this, text, Toast.LENGTH_SHORT).show
+      true
+    }
+
+    item.getItemId match {
+      case R.id.action_play => toast ("Playing")
+      case R.id.action_yank => toast ("Yanking")
+
+      case _ => super.onOptionsItemSelected(item)
+    }
+  }
 }
 
 object ListActivity {
