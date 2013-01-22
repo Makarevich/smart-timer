@@ -80,20 +80,28 @@ class ListActivity extends Activity {
 
     list_view.setAdapter(group_adapter)
 
-    val listener = new AdapterView.OnItemClickListener with View.OnTouchListener {
+    val listener =
+      new AdapterView.OnItemClickListener
+      with View.OnTouchListener
+      with View.OnDragListener
+    {
       private object TouchPoint {
-        var   pos:    Float = 0
+        var   x:      Float = 0
         var   width:  Float = 0
       }
 
+      private var drop_y: Int = 0
+
       def onTouch (v: View, event: MotionEvent): Boolean = {
         if(event.getAction != MotionEvent.ACTION_DOWN) false else {
-          TouchPoint.pos = event.getX
+          TouchPoint.x = event.getX
+          // TouchPoint.y = event.getRawY
           TouchPoint.width = v.getWidth
           Log.v("MotionEvent.ACTION_DOWN",
-            TouchPoint.pos.toString + "/" + TouchPoint.width.toString)
+            TouchPoint.x.toString + "/" + TouchPoint.width.toString)
 
-          if(TouchPoint.pos * 3 <= TouchPoint.width * 2) false else {
+          if(TouchPoint.x * 3 <= TouchPoint.width * 2) false else
+          if(group_adapter.isStashBusy) false else {
             // start drag&drop
 
             val ey = event.getRawY
@@ -118,10 +126,10 @@ class ListActivity extends Activity {
                 }
               }
 
-              val item = group_adapter.unlinkItemAt(n)
+              val start_result = ch.startDrag(null, shadow_builder, null, 0)
+              Log.v("view.startDrag", start_result.toString)
 
-              val result = ch.startDrag(null, shadow_builder, item, 0)
-              Log.v("view.startDrag", result.toString)
+              if(start_result) group_adapter.stashItemAt(n)
 
               true
             }
@@ -129,16 +137,48 @@ class ListActivity extends Activity {
         }
       }
 
-      def onDrag(v: View, event: DragEvent): Boolean = {
+      def onDrag(view: View, event: DragEvent): Boolean = {
+        val action = event.getAction
+        if(action == DragEvent.ACTION_DROP) {
+          // memorize drop site for the logic in ACTION_DRAG_ENDED
+          drop_y = event.getY.toInt
 
-        if(event.getAction == DragEvent.ACTION_DROP) {
+        }else if(action == DragEvent.ACTION_DRAG_ENDED){
+          val event_abs_y = {
+            val loc = Array[Int](0, 0)
+            view.getLocationOnScreen(loc)
+            val abs_y = drop_y + loc(1)
+
+            drop_y = 0    // zeroize drop_y
+
+            abs_y
+          }
+
+          Log.v("ACTION_DRAG_ENDED", "event_abs_y: " + event_abs_y.toString)
+
+          val insert_info = get_list_view_visible_items_info(list_view) find {
+            case (n, ch, y, dy) =>
+
+            Log.v("ACTION_DRAG_ENDED", "middle: " + (y + dy/2).toString)
+
+            event_abs_y < (y + dy/2)
+          }
+
+          val insert_pos = if(insert_info.isEmpty) 99 else {
+            val (n, ch, y, dy) = insert_info.get
+            n
+          }
+
+          Log.v("ACTION_DRAG_ENDED", "Inserting at " + insert_pos)
+
+          group_adapter.unstashItemAt(insert_pos)
         }
 
         true
       }
 
       def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
-        if(TouchPoint.pos * 3 < TouchPoint.width) {
+        if(TouchPoint.x * 3 < TouchPoint.width) {
           // display item configuration
 
           val item_at_pos = parent.getItemAtPosition(pos)
@@ -156,7 +196,7 @@ class ListActivity extends Activity {
             )
             startActivity(intent)
           }
-        }else if(TouchPoint.pos * 3 > TouchPoint.width * 2) {
+        }else if(TouchPoint.x * 3 > TouchPoint.width * 2) {
           // drag&drop is started onTouch
         }else{
           // start selection
@@ -166,7 +206,7 @@ class ListActivity extends Activity {
 
     list_view.setOnItemClickListener(listener)
     list_view.setOnTouchListener(listener)
-    // list_view.setOnDragListener(listener)
+    list_view.setOnDragListener(listener)
   }
 
   override def onSaveInstanceState (savedInstanceState: Bundle) {
@@ -255,11 +295,28 @@ private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapt
 
   ////
   
-  def unlinkItemAt(pos: Int): AbstractDelay = {
-    val item = group.items.remove(pos)
+  def stashItemAt(pos: Int) {
+    assert(stash == null, "Stashing an item to a non-empty stash")
+    stash = group.items.remove(pos)
     notifyDataSetChanged
-    item
   }
+
+  def unstashItemAt(pos: Int) {
+    assert(stash != null, "Fetching an item from an empty stash")
+
+    val sz = group.items.size
+    val p = if(pos > sz) sz else pos
+
+    group.items.insert(p, stash)
+
+    stash = null
+
+    notifyDataSetChanged
+  }
+
+  def isStashBusy: Boolean = stash != null
+
+  private var stash: AbstractDelay = null
 }
 
 
