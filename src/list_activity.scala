@@ -210,21 +210,44 @@ class ListActivity extends Activity {
       /// selection action mode
       ///
 
-      def onDestroyActionMode(mode: ActionMode) {}
+      private val checked_items = collection.mutable.Set.empty[Int]
+
       def onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-      def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
-        Log.v("onActionItemClicked", item.getItemId.toString)
+      def onDestroyActionMode(mode: ActionMode): Unit =
+        checked_items.clear
 
-        false
-      }
+      def onItemCheckedStateChanged(
+            mode: ActionMode,
+            pos: Int,
+            id: Long,
+            checked: Boolean): Unit = 
+        if(checked) checked_items.add(pos)
+        else checked_items.remove(pos)
 
       def onCreateActionMode (mode: ActionMode, menu: Menu): Boolean = {
+        mode.getMenuInflater.inflate(R.menu.action_menu, menu)
         true
       }
 
-      def onItemCheckedStateChanged(mode: ActionMode,x$2: Int,x$3: Long,x$4: Boolean) {
+      def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
+        def get_checked_positions(f: List[Int] => Unit) = {
+          f(checked_items.toList)
+
+          mode.finish
+
+          true
+        }
+
+        item.getItemId match {
+        case R.id.action_copy =>
+          get_checked_positions{ group_adapter cloneItemsAtPositions _ }
+        case R.id.action_cut =>
+          get_checked_positions{ group_adapter killItemsAtPositions _ }
+        case _ => false
+        }
       }
+
     }
 
     list_view.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL)
@@ -343,6 +366,20 @@ private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapt
   def isStashBusy: Boolean = stash != null
 
   private var stash: AbstractDelay = null
+
+  //////
+
+  def cloneItemsAtPositions (poss: List[Int]) {
+    group.items.insertAll(
+      poss.max + 1,
+      poss map { n => group.items(n).copy } 
+    )
+  }
+
+  def killItemsAtPositions (poss: List[Int]) {
+    poss.sortWith(_ > _).foreach { group.items remove _ }
+    notifyDataSetChanged
+  }
 }
 
 
@@ -421,12 +458,12 @@ class Main extends Activity {
         list.setItemChecked(pos, true)
         Log.v("Test", "Checking item " + pos)
 
-        val pp = list.getCheckedItemPositions
+        val pp = list.getcheckeditempositions
 
-        val poss = 0 to pp.size filter { pp valueAt _ } map { pp keyAt _ }
+        val poss = 0 to pp.size filter { pp valueat _ } map { pp keyat _ }
 
-        // Log.v("Test", "Bb: " + b)
-        Log.v("Test", "Checked: " + poss.mkString(", "))
+        // log.v("test", "bb: " + b)
+        log.v("test", "checked: " + poss.mkstring(", "))
 
         //data_set.dump_selected
       }

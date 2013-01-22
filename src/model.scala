@@ -22,17 +22,23 @@ package model
 
 import collection.mutable.ArrayBuffer
 
-sealed abstract class AbstractDelay
+sealed abstract class AbstractDelay {
+  def copy: AbstractDelay
+}
 
 case class DelayItem (                // TODO: add more fields...
   var amount:       Int,
   var color:        Int
-) extends AbstractDelay
+) extends AbstractDelay {
+  def copy: AbstractDelay = DelayItem(amount, color)
+}
 
 case class DelayGroup (
   var k:            Int,
   var items:        ArrayBuffer[AbstractDelay]
-) extends AbstractDelay
+) extends AbstractDelay {
+  def copy: AbstractDelay = DelayGroup(k, items map ( _.copy ) )
+}
 
 
 

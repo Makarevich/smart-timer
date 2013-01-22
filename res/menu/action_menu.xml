@@ -19,10 +19,16 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-  <string name="action_play">Play</string>
-  <string name="action_yank">Yank</string>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/action_copy"
+        android:icon="@drawable/holo_05_content_copy"
+        android:title="@string/action_copy"
+        android:showAsAction="ifRoom"
+        />
+  <item android:id="@+id/action_cut"
+        android:icon="@drawable/holo_05_content_cut"
+        android:title="@string/action_cut"
+        android:showAsAction="ifRoom"
+        />
+</menu>
 
-  <string name="action_copy">Copy</string>
-  <string name="action_cut">Cut</string>
-</resources>
