@@ -76,45 +76,37 @@ class ListActivity extends Activity {
       }
     }
 
-    list_view.setAdapter(new GroupAdapter(this, model_node))
+    val group_adapter = new GroupAdapter(this, model_node)
+
+    list_view.setAdapter(group_adapter)
 
     val listener = new AdapterView.OnItemClickListener with View.OnTouchListener {
-      private case class TouchData(
-        var   pos: Float,
-        var   width: Float)
-
-      private val touch_point = TouchData(0, 0)
+      private object TouchPoint {
+        var   pos:    Float = 0
+        var   width:  Float = 0
+      }
 
       def onTouch (v: View, event: MotionEvent): Boolean = {
         if(event.getAction != MotionEvent.ACTION_DOWN) false else {
-          touch_point.pos = event.getX
-          touch_point.width = v.getWidth
+          TouchPoint.pos = event.getX
+          TouchPoint.width = v.getWidth
           Log.v("MotionEvent.ACTION_DOWN",
-            touch_point.pos.toString + "/" + touch_point.width.toString)
+            TouchPoint.pos.toString + "/" + TouchPoint.width.toString)
 
-          if(touch_point.pos * 3 <= touch_point.width * 2) false else {
+          if(TouchPoint.pos * 3 <= TouchPoint.width * 2) false else {
             // start drag&drop
-
-            val childs = list_view.getFirstVisiblePosition to list_view.getLastVisiblePosition map {
-              n => list_view.getChildAt(n)
-            }
 
             val ey = event.getRawY
 
-            val selected_info = childs.map { ch =>
-              val loc = Array[Int](0, 0)
-              ch.getLocationOnScreen(loc)
-              (ch, loc(1), ch.getHeight)
-
-              // Log.v("onTouch", "Kid loc: " + (y, dy).toString)
-            } find {
-              case (ch, y, dy) => y <= ey && ey <= (y + dy)
+            val selected_info = get_list_view_visible_items_info(list_view) find {
+              case (n, ch, y, dy) =>
+                y <= ey && ey <= (y + dy)
             }
 
             // Log.v("onTouch", "Found a child: " + selected_child.toString)
 
             if(selected_info.isEmpty) false else {
-              val (ch, y, dy) = selected_info.get
+              val (n, ch, y, dy) = selected_info.get
 
               val shadow_x = event.getRawX.toInt
               val shadow_y = (ey - y).toInt
@@ -126,7 +118,9 @@ class ListActivity extends Activity {
                 }
               }
 
-              val result = ch.startDrag(null, shadow_builder, null, 0)
+              val item = group_adapter.unlinkItemAt(n)
+
+              val result = ch.startDrag(null, shadow_builder, item, 0)
               Log.v("view.startDrag", result.toString)
 
               true
@@ -135,9 +129,16 @@ class ListActivity extends Activity {
         }
       }
 
-      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+      def onDrag(v: View, event: DragEvent): Boolean = {
 
-        if(touch_point.pos * 3 < touch_point.width) {
+        if(event.getAction == DragEvent.ACTION_DROP) {
+        }
+
+        true
+      }
+
+      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+        if(TouchPoint.pos * 3 < TouchPoint.width) {
           // display item configuration
 
           val item_at_pos = parent.getItemAtPosition(pos)
@@ -155,7 +156,7 @@ class ListActivity extends Activity {
             )
             startActivity(intent)
           }
-        }else if(touch_point.pos * 3 > touch_point.width * 2) {
+        }else if(TouchPoint.pos * 3 > TouchPoint.width * 2) {
           // drag&drop is started onTouch
         }else{
           // start selection
@@ -165,6 +166,7 @@ class ListActivity extends Activity {
 
     list_view.setOnItemClickListener(listener)
     list_view.setOnTouchListener(listener)
+    // list_view.setOnDragListener(listener)
   }
 
   override def onSaveInstanceState (savedInstanceState: Bundle) {
@@ -189,6 +191,24 @@ class ListActivity extends Activity {
       case _ => super.onOptionsItemSelected(item)
     }
   }
+
+  //////
+
+
+  def get_list_view_visible_items_info(list_view: ListView) = {
+    val first_pos = list_view.getFirstVisiblePosition
+    val last_pos  = list_view.getLastVisiblePosition
+    
+    first_pos to last_pos map { n =>
+      val ch = list_view.getChildAt(n)
+
+      val loc = Array[Int](0, 0)
+      ch.getLocationOnScreen(loc)
+
+      (n, ch, loc(1), ch.getHeight)
+    }
+  }
+
 }
 
 object ListActivity {
@@ -231,6 +251,14 @@ private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapt
         tv.setText(subgroup.k.toString)
       }
     }
+  }
+
+  ////
+  
+  def unlinkItemAt(pos: Int): AbstractDelay = {
+    val item = group.items.remove(pos)
+    notifyDataSetChanged
+    item
   }
 }
 
