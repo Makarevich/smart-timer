@@ -84,6 +84,7 @@ class ListActivity extends Activity {
       new AdapterView.OnItemClickListener
       with View.OnTouchListener
       with View.OnDragListener
+      with AbsListView.MultiChoiceModeListener
     {
       private object TouchPoint {
         var   x:      Float = 0
@@ -154,12 +155,12 @@ class ListActivity extends Activity {
             abs_y
           }
 
-          Log.v("ACTION_DRAG_ENDED", "event_abs_y: " + event_abs_y.toString)
+          // Log.v("ACTION_DRAG_ENDED", "event_abs_y: " + event_abs_y.toString)
 
           val insert_info = get_list_view_visible_items_info(list_view) find {
             case (n, ch, y, dy) =>
 
-            Log.v("ACTION_DRAG_ENDED", "middle: " + (y + dy/2).toString)
+            // Log.v("ACTION_DRAG_ENDED", "middle: " + (y + dy/2).toString)
 
             event_abs_y < (y + dy/2)
           }
@@ -169,7 +170,7 @@ class ListActivity extends Activity {
             n
           }
 
-          Log.v("ACTION_DRAG_ENDED", "Inserting at " + insert_pos)
+          // Log.v("ACTION_DRAG_ENDED", "Inserting at " + insert_pos)
 
           group_adapter.unstashItemAt(insert_pos)
         }
@@ -200,13 +201,38 @@ class ListActivity extends Activity {
           // drag&drop is started onTouch
         }else{
           // start selection
+
+          list_view.setItemChecked(pos, true)
         }
       }
+
+      /////////////////////////////
+      /// selection action mode
+      ///
+
+      def onDestroyActionMode(mode: ActionMode) {}
+      def onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+
+      def onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = {
+        Log.v("onActionItemClicked", item.getItemId.toString)
+
+        false
+      }
+
+      def onCreateActionMode (mode: ActionMode, menu: Menu): Boolean = {
+        true
+      }
+
+      def onItemCheckedStateChanged(mode: ActionMode,x$2: Int,x$3: Long,x$4: Boolean) {
+      }
     }
+
+    list_view.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL)
 
     list_view.setOnItemClickListener(listener)
     list_view.setOnTouchListener(listener)
     list_view.setOnDragListener(listener)
+    list_view.setMultiChoiceModeListener(listener)
   }
 
   override def onSaveInstanceState (savedInstanceState: Bundle) {
