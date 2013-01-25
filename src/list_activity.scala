@@ -87,7 +87,7 @@ class ListActivity extends Activity {
       val model = getApplication.asInstanceOf[MyApplication].model
 
       try {
-        if(intent_path == null) model else {
+        if(intent_path.isEmpty) model else {
           @tailrec def descend_model(path: List[Byte], group: DelayGroup): DelayGroup = {
             if(path == Nil) group else {
               val node = group.items(path.head)
@@ -286,8 +286,13 @@ class ListActivity extends Activity {
     list_view.setMultiChoiceModeListener(listener)
   }
 
-  override def onSaveInstanceState (savedInstanceState: Bundle) {
-    super.onSaveInstanceState(savedInstanceState)
+  override def onPause {
+    super.onPause
+
+    // if we're the topmost activity (i.e. out intent_path is empty),
+    // the the app to save its state
+    if(intent_path.isEmpty)
+      getApplication.asInstanceOf[MyApplication].save_state
   }
 
   override def onCreateOptionsMenu(menu: Menu) = {
