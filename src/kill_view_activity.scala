@@ -19,29 +19,37 @@
 
 package makarevich.test1
 
-import android.app.Application
+import android.app.Activity
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
+
+
+import android.view._
+import android.widget._
 
 import model._
-import collection.mutable.ArrayBuffer
 
-class MyApplication extends Application {
-  val model: DelayGroup = {
-    DelayGroup(1, ArrayBuffer(
-      DelayItem(10, 0),
-      DelayItem(20, 0),
-      DelayGroup(3, ArrayBuffer(
-        DelayItem(10, 0),
-        DelayGroup(5, ArrayBuffer(
-          DelayItem(20, 0),
-          DelayItem(20, 0),
-          DelayItem(20, 0)
-        )),
-        DelayItem(20, 0)
-      )),
-      DelayItem(10, 0)
-    ))
+
+class KillViewActivity extends Activity {
+  override def onCreate(savedInstanceState: Bundle) {
+    super.onCreate(savedInstanceState)
+
+    setContentView(R.layout.group_view)
+    val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
+
+    val group_adapter = {
+      val buffer = getApplication.asInstanceOf[MyApplication].kill_buffer
+      new GroupAdapter(this, buffer)
+    }
+
+
+    list_view.setAdapter(group_adapter)
+
+    list_view.setOnItemClickListener(new AdapterView.OnItemClickListener {
+      def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+      }
+    })
   }
-
-  val kill_buffer = DelayGroup(1, ArrayBuffer.empty)
 }
 

@@ -34,12 +34,38 @@ import annotation.tailrec
 
 import model._
 
+
+
+
+object ListActivity {
+  private val IntentExtraModelPathByteArray = "MODEL_PATH"
+  //private[test1] val IntentExtraModelPathByteArray = "MODEL_PATH"
+}
+
+
+
 class ListActivity extends Activity {
   private var intent_path: Array[Byte] = null
 
   private val this_activity = this
 
   private class InvalidModelPath extends Throwable
+
+  private def get_list_view_visible_items_info(list_view: ListView) = {
+    val first_pos = list_view.getFirstVisiblePosition
+    val last_pos  = list_view.getLastVisiblePosition
+    
+    first_pos to last_pos map { n =>
+      val ch = list_view.getChildAt(n)
+
+      val loc = Array[Int](0, 0)
+      ch.getLocationOnScreen(loc)
+
+      (n, ch, loc(1), ch.getHeight)
+    }
+  }
+
+  //////
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -275,110 +301,15 @@ class ListActivity extends Activity {
 
     item.getItemId match {
       case R.id.action_play => toast ("Playing")
-      case R.id.action_yank => toast ("Yanking")
+
+
+      case R.id.action_yank =>
+        val intent = new Intent(this_activity, classOf[KillViewActivity])
+        startActivity(intent)
+        true
 
       case _ => super.onOptionsItemSelected(item)
     }
-  }
-
-  //////
-
-
-  def get_list_view_visible_items_info(list_view: ListView) = {
-    val first_pos = list_view.getFirstVisiblePosition
-    val last_pos  = list_view.getLastVisiblePosition
-    
-    first_pos to last_pos map { n =>
-      val ch = list_view.getChildAt(n)
-
-      val loc = Array[Int](0, 0)
-      ch.getLocationOnScreen(loc)
-
-      (n, ch, loc(1), ch.getHeight)
-    }
-  }
-
-}
-
-object ListActivity {
-  private val IntentExtraModelPathByteArray = "MODEL_PATH"
-}
-
-private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapter {
-  override def getViewTypeCount = 2
-  override def getItemViewType(pos: Int) = group.items(pos) match {
-    case _: DelayItem => 0
-    case _: DelayGroup => 1
-  }
-
-  /////
-
-  def getItemId(i: Int) = 0
-  def getItem(i: Int) = group.items(i)
-
-  def getCount = group.items.size
-
-  def getView(i: Int, another: View, parent: ViewGroup): View = {
-    def inflate(id: Int)(f: View => Unit): View = {
-      val view = ctxt.getLayoutInflater.inflate(id, null)
-      f(view)
-      view
-    }
-
-    group.items(i) match {
-      case item: DelayItem => inflate(R.layout.delay_item) { view =>
-        val im = view.findViewById(R.id.image_view).asInstanceOf[ImageView]
-        val tv = view.findViewById(R.id.item_text_view).asInstanceOf[TextView]
-
-        im.setBackgroundColor(item.color)
-        tv.setText(item.amount.toString)
-      }
-
-      case subgroup: DelayGroup => inflate(R.layout.delay_group_item) { view =>
-        val tv = view.findViewById(R.id.group_text_view).asInstanceOf[TextView]
-
-        tv.setText(subgroup.k.toString)
-      }
-    }
-  }
-
-  ////
-  
-  def stashItemAt(pos: Int) {
-    assert(stash == null, "Stashing an item to a non-empty stash")
-    stash = group.items.remove(pos)
-    notifyDataSetChanged
-  }
-
-  def unstashItemAt(pos: Int) {
-    assert(stash != null, "Fetching an item from an empty stash")
-
-    val sz = group.items.size
-    val p = if(pos > sz) sz else pos
-
-    group.items.insert(p, stash)
-
-    stash = null
-
-    notifyDataSetChanged
-  }
-
-  def isStashBusy: Boolean = stash != null
-
-  private var stash: AbstractDelay = null
-
-  //////
-
-  def cloneItemsAtPositions (poss: List[Int]) {
-    group.items.insertAll(
-      poss.max + 1,
-      poss map { n => group.items(n).copy } 
-    )
-  }
-
-  def killItemsAtPositions (poss: List[Int]) {
-    poss.sortWith(_ > _).foreach { group.items remove _ }
-    notifyDataSetChanged
   }
 }
 

@@ -27,4 +27,11 @@
     <color name="blue">#88F</color>
     <color name="orange">#883</color>
     <color name="black">#000</color>
+
+
+
+
+
+    <string name="app_name">Test app 1</string>
+    <string name="kill_buffer">Kill buffer</string>
 </resources>
