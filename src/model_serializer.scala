@@ -23,6 +23,8 @@ package model.serializer
 import android.os.Parcel
 import android.os.Parcelable
 
+import android.util.Log
+
 import collection.mutable.ArrayBuffer
 
 import model._
@@ -66,15 +68,20 @@ object ModelParceller{
         val list = ArrayBuffer.empty[AbstractDelay]
 
         while(true) {
+          if(parcel.dataAvail == 0) return list
+
           val tag = parcel.readByte
           if(tag == MarkerItemStart) {
+            // Log.v("creator_rec", "MarkerItemStart")
             list += DelayItem(parcel.readInt, parcel.readInt)
           } else if(tag == MarkerGroupStart) {
+            // Log.v("creator_rec", "MarkerGroupStart")
             val k = parcel.readInt
             val items = creator_rec
 
             list += DelayGroup(k, items)
           } else if(tag == MarkerGroupEnd) {
+            // Log.v("creator_rec", "MarkerGroupEnd")
             return list
           } else {
             throw new Exception("ModelParceller.createFromParcel: invalid tag")
@@ -84,7 +91,13 @@ object ModelParceller{
         list
       }
 
+      // Log.v("createFromParcel", "Parcel: " + parcel.toString)
+
+      // Log.v("createFromParcel", "Available bytes in parcel: " + parcel.dataAvail)
+
       val result = creator_rec
+
+      // Log.v("createFromParcel", "Parsed: " + result.toString)
 
       assert(result.size == 1, "ModelParceller.createFromParcel: invalid object structure")
 

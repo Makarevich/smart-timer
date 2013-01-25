@@ -22,6 +22,7 @@ package makarevich.test1
 import android.app.Application
 import android.content.Context
 import android.os.Parcel
+import android.util.Log
 
 import java.io.{FileNotFoundException, IOException}
 
@@ -62,6 +63,9 @@ class MyApplication extends Application {
         )
     }
 
+    def log(s: String): Unit = Log.v("MyApplication.onCreate", s)
+
+
     try {
       val data: Array[Byte] = {
         val buf = ArrayBuilder.make[Byte]
@@ -90,6 +94,7 @@ class MyApplication extends Application {
 
       try {
         parcel.unmarshall(data, 0, data.size)
+        parcel.setDataPosition(0)
 
         model.items = ModelParceller.CREATOR.createFromParcel(parcel)
                         .delay.asInstanceOf[DelayGroup].items
@@ -104,6 +109,11 @@ class MyApplication extends Application {
   }
 
   def save_state {
+    def handler[T <: Throwable](e: T) {
+      // Log.v("save_state", "Exception happened")
+      throw e
+    }
+
     try {
       val data = {
         val parcel = Parcel.obtain
@@ -123,8 +133,8 @@ class MyApplication extends Application {
       try stream.write(data, 0, data.size)
       finally stream.close
     } catch {
-      case e: FileNotFoundException =>
-      case e: IOException =>
+      case e: FileNotFoundException => handler(e)
+      case e: IOException => handler(e)
     }
   }
 }
