@@ -48,6 +48,8 @@ class KillViewActivity extends Activity {
 
     list_view.setOnItemClickListener(new AdapterView.OnItemClickListener {
       def onItemClick(parent: AdapterView[_], view: View, pos: Int, id: Long) {
+        setResult(Activity.RESULT_FIRST_USER + pos)
+        finish
       }
     })
   }

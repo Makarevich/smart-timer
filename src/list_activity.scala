@@ -39,13 +39,15 @@ import model._
 
 object ListActivity {
   private val IntentExtraModelPathByteArray = "MODEL_PATH"
-  //private[test1] val IntentExtraModelPathByteArray = "MODEL_PATH"
+
+  private val KillBufferActivityRequestCode = 0
 }
 
 
 
 class ListActivity extends Activity {
   private var intent_path: Array[Byte] = null
+  private var group_adapter: GroupAdapter = null
 
   private val this_activity = this
 
@@ -102,7 +104,7 @@ class ListActivity extends Activity {
       }
     }
 
-    val group_adapter = new GroupAdapter(this, model_node)
+    group_adapter = new GroupAdapter(this, model_node)
 
     list_view.setAdapter(group_adapter)
 
@@ -305,10 +307,21 @@ class ListActivity extends Activity {
 
       case R.id.action_yank =>
         val intent = new Intent(this_activity, classOf[KillViewActivity])
-        startActivity(intent)
+        startActivityForResult(intent, ListActivity.KillBufferActivityRequestCode)
         true
 
       case _ => super.onOptionsItemSelected(item)
+    }
+  }
+
+  override def onActivityResult (request: Int, result: Int, data: Intent) {
+    if(request == ListActivity.KillBufferActivityRequestCode &&
+       result >= Activity.RESULT_FIRST_USER)
+    {
+
+      val pos = result - Activity.RESULT_FIRST_USER
+
+      group_adapter.yankKilledItem(pos)
     }
   }
 }

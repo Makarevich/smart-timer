@@ -117,5 +117,14 @@ private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapt
 
     notifyDataSetChanged
   }
+
+  def yankKilledItem(killed_pos: Int) {
+    val item = ctxt.getApplication.asInstanceOf[MyApplication]
+      .kill_buffer.items.remove(killed_pos)
+
+    group.items.append(item)
+
+    notifyDataSetChanged
+  }
 }
 
