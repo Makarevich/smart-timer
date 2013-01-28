@@ -109,7 +109,7 @@ class ListActivity extends Activity {
     list_view.setAdapter(group_adapter)
 
     val listener =
-      new AdapterView.OnItemClickListener
+      new  AdapterView.OnItemClickListener
       with View.OnTouchListener
       with View.OnDragListener
       with AbsListView.MultiChoiceModeListener
@@ -234,6 +234,25 @@ class ListActivity extends Activity {
         }
       }
 
+      /*
+      def onItemLongClick(
+        parent: AdapterView[_], view: View, pos: Int, id: Long
+      ): Boolean = {
+        val item_at_pos = parent.getItemAtPosition(pos)
+          
+        if(item_at_pos.isInstanceOf[DelayGroup]) {
+          val group = item_at_pos.asInstanceOf[DelayGroup]
+
+          Toast.makeText(this_activity,
+            "Group k: " + group.k.toString,
+            Toast.LENGTH_SHORT).show
+        }
+
+        false
+      }
+      */
+
+
       /////////////////////////////
       /// selection action mode
       ///
@@ -297,6 +316,9 @@ class ListActivity extends Activity {
 
   override def onCreateOptionsMenu(menu: Menu) = {
     getMenuInflater.inflate(R.menu.action_bar, menu)
+
+    menu.findItem(R.id.action_k).setTitle("3x")
+
     true
   }
 
@@ -314,6 +336,20 @@ class ListActivity extends Activity {
         val intent = new Intent(this_activity, classOf[KillViewActivity])
         startActivityForResult(intent, ListActivity.KillBufferActivityRequestCode)
         true
+
+      case R.id.action_k =>
+        /*
+        val v: Int = (Integer.parseInt(item.getTitle.toString.take(1)) + 1)
+        val vs = v.toString
+        Log.v("onOptionsItemSelected", "setting action bar to " + vs)
+        item.setTitle(v.toString + "x")
+        true
+        */
+        val dia = new DelayGroupCoeffDialogFragment
+        dia.show(getFragmentManager, "coeff_dialog")
+        true
+
+        //toast("Modifying k")
 
       case _ => super.onOptionsItemSelected(item)
     }

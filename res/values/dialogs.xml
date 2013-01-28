@@ -19,20 +19,10 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/action_k"
-        android:title="1x"
-        android:showAsAction="always"
-        />
-  <item android:id="@+id/action_play"
-        android:icon="@drawable/holo_09_av_play"
-        android:title="@string/action_play"
-        android:showAsAction="always"
-        />
-  <item android:id="@+id/action_yank"
-        android:icon="@drawable/holo_05_content_paste"
-        android:title="@string/action_yank"
-        android:showAsAction="always"
-        />
-</menu>
+<resources>
+  <string name="dialog_title_delay_group_coeff">Select group k</string>
+
+  <string name="dialog_button_ok">OK</string>
+  <string name="dialog_button_cancel">Cancel</string>
+</resources>
 

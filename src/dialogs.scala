@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--
+/*
     Copyright 2013 Yury Makarevich
 
     This file is part of Smart Timer.
@@ -17,22 +15,37 @@
 
     You should have received a copy of the GNU General Public License
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
--->
+*/
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:id="@+id/action_k"
-        android:title="1x"
-        android:showAsAction="always"
-        />
-  <item android:id="@+id/action_play"
-        android:icon="@drawable/holo_09_av_play"
-        android:title="@string/action_play"
-        android:showAsAction="always"
-        />
-  <item android:id="@+id/action_yank"
-        android:icon="@drawable/holo_05_content_paste"
-        android:title="@string/action_yank"
-        android:showAsAction="always"
-        />
-</menu>
+package makarevich.test1
 
+import android.app.AlertDialog
+import android.app.{Dialog,DialogFragment}
+
+import android.os.Bundle
+
+import android.widget.NumberPicker
+
+import android.util.Log
+
+private class DelayGroupCoeffDialogFragment extends DialogFragment {
+  override def onCreateDialog(b: Bundle): Dialog = {
+    val ctxt = getActivity
+
+    Log.v("onCreateDialog", "Creating number picker")
+
+    val picker = new NumberPicker(ctxt)
+
+    picker.setMinValue(0)
+    picker.setMaxValue(10)
+
+
+    Log.v("onCreateDialog", "Creating AlertDialog")
+
+    new AlertDialog.Builder(ctxt)
+      .setTitle(ctxt.getString(R.string.dialog_title_delay_group_coeff))
+      .setView(picker)
+      .create
+  }
+
+}
