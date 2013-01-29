@@ -305,8 +305,14 @@ class ListActivity extends Activity {
     list_view.setMultiChoiceModeListener(listener)
   }
 
-  override def onPause {
-    super.onPause
+  override def onResume {
+    super.onResume
+
+    group_adapter.notifyDataSetChanged
+  }
+
+  override def onStop {
+    super.onStop
 
     // if we're the topmost activity (i.e. out intent_path is empty),
     // the the app to save its state
@@ -317,7 +323,9 @@ class ListActivity extends Activity {
   override def onCreateOptionsMenu(menu: Menu) = {
     getMenuInflater.inflate(R.menu.action_bar, menu)
 
-    menu.findItem(R.id.action_k).setTitle("3x")
+    val group_k = group_adapter.group_k
+
+    menu.findItem(R.id.action_k).setTitle(group_k.toString + "x")
 
     true
   }
@@ -345,7 +353,14 @@ class ListActivity extends Activity {
         item.setTitle(v.toString + "x")
         true
         */
-        val dia = new DelayGroupCoeffDialogFragment
+        val dia = new DelayGroupCoeffDialogFragment(
+          group_adapter.group_k,
+          { k =>
+            item.setTitle(k.toString + "x")
+            group_adapter.set_group_k(k)
+          }
+        )
+
         dia.show(getFragmentManager, "coeff_dialog")
         true
 

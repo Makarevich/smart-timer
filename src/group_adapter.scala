@@ -126,5 +126,15 @@ private class GroupAdapter (ctxt: Activity, group: DelayGroup) extends BaseAdapt
 
     notifyDataSetChanged
   }
+
+  ////////////////////////////////
+  // k coeff
+  //
+
+  def group_k = group.k
+
+  def set_group_k(new_k: Int) {
+    group.k = new_k
+  }
 }
 

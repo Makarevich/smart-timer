@@ -21,6 +21,7 @@ package makarevich.test1
 
 import android.app.AlertDialog
 import android.app.{Dialog,DialogFragment}
+import android.content.DialogInterface
 
 import android.os.Bundle
 
@@ -28,23 +29,40 @@ import android.widget.NumberPicker
 
 import android.util.Log
 
-private class DelayGroupCoeffDialogFragment extends DialogFragment {
+private class DelayGroupCoeffDialogFragment (
+  start_value: Int,
+  cb: Int => Unit
+) extends DialogFragment {
   override def onCreateDialog(b: Bundle): Dialog = {
     val ctxt = getActivity
 
-    Log.v("onCreateDialog", "Creating number picker")
+    // Log.v("onCreateDialog", "Creating number picker")
 
     val picker = new NumberPicker(ctxt)
 
-    picker.setMinValue(0)
+    picker.setMinValue(1)
     picker.setMaxValue(10)
 
+    picker.setValue(start_value)
 
-    Log.v("onCreateDialog", "Creating AlertDialog")
+    // Log.v("onCreateDialog", "Creating AlertDialog")
 
     new AlertDialog.Builder(ctxt)
       .setTitle(ctxt.getString(R.string.dialog_title_delay_group_coeff))
       .setView(picker)
+      .setPositiveButton(R.string.dialog_button_ok,
+        new DialogInterface.OnClickListener {
+          def onClick(dialog: DialogInterface, which: Int) {
+            cb(picker.getValue)
+          }
+        }
+      )
+      .setNegativeButton(R.string.dialog_button_cancel,
+        new DialogInterface.OnClickListener {
+          def onClick(dialog: DialogInterface, which: Int) {
+          }
+        }
+      )
       .create
   }
 
