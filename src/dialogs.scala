@@ -29,6 +29,7 @@ import android.os.Bundle
 import android.view.View
 
 import android.widget.NumberPicker
+import android.widget.Spinner
 
 import android.util.Log
 
@@ -101,7 +102,12 @@ extends CommonDialogFragment {
       view.findViewById(R.id.delay_picker).asInstanceOf[NumberPicker]
 
     picker.setMinValue(1)
-    picker.setMaxValue(7)
+    picker.setMaxValue(ctxt.getResources.getInteger(R.integer.max_delay))
+
+    val spinner =
+      view.findViewById(R.id.delay_color_spinner).asInstanceOf[Spinner]
+
+    spinner.setAdapter(new ColorAdapter(ctxt))
 
 
     DialogInfo (

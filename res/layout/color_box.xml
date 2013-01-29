@@ -20,23 +20,9 @@
 -->
 
 
-<makarevich.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:background="@drawable/rowselector"
-  >
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="@dimen/color_box_size"
+  android:layout_height="@dimen/color_box_size"
+  android:scaleType="fitXY"
+  />
 
-  <include
-    layout="@layout/color_box"
-    android:id="@+id/image_view"
-    />
-
-  <TextView
-    android:id="@+id/item_text_view"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    />
-      
-
-</makarevich.CheckableLinearLayout>

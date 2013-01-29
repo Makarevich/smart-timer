@@ -26,8 +26,8 @@
 
   <Spinner
     android:id="@+id/delay_color_spinner"
-    android:layout_width="60dp"
-    android:layout_height="60dp"
+    android:layout_width="100dp"
+    android:layout_height="wrap_content"
     android:layout_weight="1"
     />
 

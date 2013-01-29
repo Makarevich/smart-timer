@@ -32,6 +32,11 @@
   <color name="orange">#883</color>
   <color name="black">#000</color>
 
+  <array name="colors">
+    <item>#FFFF0000</item>
+    <item>#FF00FF00</item>
+    <item>#FF0000FF</item>
+  </array>
 
   <string name="app_name">Test app 1</string>
   <string name="kill_buffer">Kill buffer</string>
@@ -40,4 +45,5 @@
 
 
   <integer name="max_group_k">10</integer>
+  <integer name="max_delay">120</integer>
 </resources>
