@@ -19,41 +19,44 @@
 
 package makarevich.test1
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.{Dialog,DialogFragment}
 import android.content.DialogInterface
 
 import android.os.Bundle
 
+import android.view.View
+
 import android.widget.NumberPicker
 
 import android.util.Log
 
-private class DelayGroupCoeffDialogFragment (
-  start_value: Int,
-  cb: Int => Unit
-) extends DialogFragment {
+
+private trait CommonDialogFragment extends DialogFragment {
+  protected case class DialogInfo(
+    title_resource:   Int,
+    view:             View,
+    ok_cb:            () => Unit
+  )
+
+  protected def customize_dialog(ctxt: Activity): DialogInfo
+
   override def onCreateDialog(b: Bundle): Dialog = {
     val ctxt = getActivity
 
     // Log.v("onCreateDialog", "Creating number picker")
-
-    val picker = new NumberPicker(ctxt)
-
-    picker.setMinValue(1)
-    picker.setMaxValue(10)
-
-    picker.setValue(start_value)
-
     // Log.v("onCreateDialog", "Creating AlertDialog")
 
+    val info = customize_dialog(ctxt)
+
     new AlertDialog.Builder(ctxt)
-      .setTitle(ctxt.getString(R.string.dialog_title_delay_group_coeff))
-      .setView(picker)
+      .setTitle(info.title_resource)
+      .setView(info.view)
       .setPositiveButton(R.string.dialog_button_ok,
         new DialogInterface.OnClickListener {
           def onClick(dialog: DialogInterface, which: Int) {
-            cb(picker.getValue)
+            info.ok_cb()
           }
         }
       )
@@ -65,5 +68,47 @@ private class DelayGroupCoeffDialogFragment (
       )
       .create
   }
+}
+
+private class DelayGroupCoeffDialogFragment (
+  start_value: Int,
+  cb: Int => Unit
+) extends CommonDialogFragment {
+  protected def customize_dialog(ctxt: Activity): DialogInfo = {
+    val picker = new NumberPicker(ctxt)
+
+    picker.setMinValue(1)
+    picker.setMaxValue(ctxt.getResources.getInteger(R.integer.max_group_k))
+
+    picker.setValue(start_value)
+
+    DialogInfo(
+      R.string.dialog_title_delay_group_coeff,
+      picker,
+      () => cb(picker.getValue)
+    )
+  }
 
 }
+
+private class DelayItemConfigDialogFragment
+extends CommonDialogFragment {
+  protected def customize_dialog(ctxt: Activity): DialogInfo = {
+    val view =
+      ctxt.getLayoutInflater.inflate(R.layout.dialog_delay_item_config, null)
+
+    val picker =
+      view.findViewById(R.id.delay_picker).asInstanceOf[NumberPicker]
+
+    picker.setMinValue(1)
+    picker.setMaxValue(7)
+
+
+    DialogInfo (
+      R.string.dialog_title_delay_item_config,
+      view,
+      () => 0
+    )
+  }
+}
+

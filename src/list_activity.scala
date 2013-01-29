@@ -224,6 +224,12 @@ class ListActivity extends Activity {
               new_path
             )
             startActivity(intent)
+          }else if(item_at_pos.isInstanceOf[DelayItem]) {
+            val dia = new DelayItemConfigDialogFragment
+
+            
+            
+            dia.show(getFragmentManager, "item_config_dialog")
           }
         }else if(TouchPoint.x * 3 > TouchPoint.width * 2) {
           // drag&drop is started onTouch

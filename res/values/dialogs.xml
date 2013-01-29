@@ -21,6 +21,7 @@
 
 <resources>
   <string name="dialog_title_delay_group_coeff">Select group k</string>
+  <string name="dialog_title_delay_item_config">Delay properties</string>
 
   <string name="dialog_button_ok">OK</string>
   <string name="dialog_button_cancel">Cancel</string>
