@@ -26,8 +26,7 @@ import android.widget._
 
 import android.util.Log
 
-private class ColorAdapter (ctxt: Activity)
-extends BaseAdapter with SpinnerAdapter
+private class ColorAdapter (ctxt: Activity) extends BaseAdapter
 {
   private val color_array: Array[Int] = {
     val ta = ctxt.getResources.obtainTypedArray(R.array.colors)
@@ -50,14 +49,18 @@ extends BaseAdapter with SpinnerAdapter
   override def getView(i: Int, another: View, parent: ViewGroup): View = {
     val view = ctxt.getLayoutInflater.inflate(R.layout.color_box, null)
 
+    Log.v("ColorAdapter", "getView: " + i.toString)
+
     view.asInstanceOf[ImageView].setBackgroundColor(color_array(i))
 
     view
   }
 
+  /*
   override def getDropDownView(pos: Int, convertView: View, parent: ViewGroup): View = {
     getView(pos, convertView, parent)
   }
+  */
 
   assert(getCount > 0, "Empty array detected")
 }
