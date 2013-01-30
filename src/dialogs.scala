@@ -104,7 +104,7 @@ extends CommonDialogFragment {
     picker.setMaxValue(ctxt.getResources.getInteger(R.integer.max_delay))
 
     val spinner =
-      view.findViewById(R.id.delay_color_spinner).asInstanceOf[ListView]
+      view.findViewById(R.id.delay_color_spinner).asInstanceOf[Spinner]
 
     spinner.setAdapter(new ColorAdapter(ctxt))
 

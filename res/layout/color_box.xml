@@ -24,5 +24,11 @@
   android:layout_width="@dimen/color_box_size"
   android:layout_height="@dimen/color_box_size"
   android:scaleType="fitXY"
+  android:minWidth="@dimen/color_box_size"
+  android:minHeight="@dimen/color_box_size"
   />
 
+  <!--
+  android:minWidth="@dimen/color_box_size"
+  android:minHeight="@dimen/color_box_size"
+  -->
