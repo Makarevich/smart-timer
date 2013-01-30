@@ -41,7 +41,7 @@ private class ColorAdapter (ctxt: Activity) extends BaseAdapter
   // BaseAdapter abstract members
   //
 
-  override def getItemId(i: Int) = 0 // color_array(i)
+  override def getItemId(i: Int) = color_array(i)
   override def getItem(i: Int) = null
 
   override def getCount: Int = color_array.size

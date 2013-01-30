@@ -91,8 +91,12 @@ private class DelayGroupCoeffDialogFragment (
 
 }
 
-private class DelayItemConfigDialogFragment
-extends CommonDialogFragment {
+private class DelayItemConfigDialogFragment (
+  start_value:  Int,
+  start_color:  Int,
+
+  cb: (Int, Int) => Unit    // a (Delay, Color) pair
+) extends CommonDialogFragment {
   protected def customize_dialog(ctxt: Activity): DialogInfo = {
     val view =
       ctxt.getLayoutInflater.inflate(R.layout.dialog_delay_item_config, null)
@@ -103,16 +107,27 @@ extends CommonDialogFragment {
     picker.setMinValue(1)
     picker.setMaxValue(ctxt.getResources.getInteger(R.integer.max_delay))
 
+    picker.setValue(start_value)
+
     val spinner =
       view.findViewById(R.id.delay_color_spinner).asInstanceOf[Spinner]
 
-    spinner.setAdapter(new ColorAdapter(ctxt))
+    val spinner_data = new ColorAdapter(ctxt)
+
+    spinner.setAdapter(spinner_data)
+
+    // select the item, whose color is equal to start_color
+    0 until spinner_data.getCount map {
+      i => (i, spinner_data.getItemId(i).toInt)
+    } find ( _._2 == start_color ) foreach { pair =>
+      spinner.setSelection(pair._1)
+    }
 
 
     DialogInfo (
       R.string.dialog_title_delay_item_config,
       view,
-      () => 0
+      () => cb(picker.getValue, spinner.getSelectedItemId.toInt)
     )
   }
 }

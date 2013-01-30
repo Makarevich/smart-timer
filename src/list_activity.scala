@@ -225,10 +225,18 @@ class ListActivity extends Activity {
             )
             startActivity(intent)
           }else if(item_at_pos.isInstanceOf[DelayItem]) {
-            val dia = new DelayItemConfigDialogFragment
+            val delay_item = item_at_pos.asInstanceOf[DelayItem]
 
-            
-            
+            val dia = new DelayItemConfigDialogFragment (
+              delay_item.amount,
+              delay_item.color,
+              { (am, co) =>
+                delay_item.amount = am
+                delay_item.color  = co
+                group_adapter.notifyDataSetChanged
+              }
+            )
+
             dia.show(getFragmentManager, "item_config_dialog")
           }
         }else if(TouchPoint.x * 3 > TouchPoint.width * 2) {

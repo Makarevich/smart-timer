@@ -20,7 +20,8 @@
 -->
 
 <resources>
-  <dimen name="color_box_size">60dp</dimen>
+  <dimen name="color_box_size">50dp</dimen>
+  <dimen name="color_box_margin">10dp</dimen>
 
   <!--
   <integer name="color_count">8</integer>

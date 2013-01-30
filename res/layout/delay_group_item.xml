@@ -30,6 +30,10 @@
     android:id="@+id/image_view"
     android:layout_width="@dimen/color_box_size"
     android:layout_height="@dimen/color_box_size"
+    android:layout_marginLeft="@dimen/color_box_margin"
+    android:layout_marginTop="@dimen/color_box_margin"
+    android:layout_marginRight="@dimen/color_box_margin"
+    android:layout_marginBottom="@dimen/color_box_margin"
     android:scaleType="fitXY"
     android:background="@drawable/holo_05_content_email"
     />
