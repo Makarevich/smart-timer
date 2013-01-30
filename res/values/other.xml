@@ -20,6 +20,11 @@
 -->
 
 <resources>
+  <string name="app_name">Smart timer</string>
+
+
+
+
   <dimen name="color_box_size">50dp</dimen>
   <dimen name="color_box_margin">10dp</dimen>
 
@@ -39,7 +44,6 @@
     <item>#FF0000FF</item>
   </array>
 
-  <string name="app_name">Test app 1</string>
   <string name="kill_buffer">Kill buffer</string>
 
 

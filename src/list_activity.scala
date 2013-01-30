@@ -17,7 +17,7 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package makarevich.test1
+package makarevich.smart_timer
 
 import android.app.Activity
 import android.content.Intent

@@ -17,7 +17,7 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package makarevich.test1
+package makarevich.smart_timer
 package model.serializer
 
 import android.os.Parcel
