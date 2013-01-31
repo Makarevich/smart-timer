@@ -108,6 +108,30 @@ class MyApplication extends Application {
     }
   }
 
+  def find_model_node(intent_path: Array[Byte]): DelayGroup = {
+    Log.v("MyApplication::find_model_node",
+      "intent_path: " + intent_path.mkString(","))
+
+    class InvalidModelPath extends Throwable
+
+    try {
+      if(intent_path.isEmpty) model else {
+        @tailrec def descend_model(path: List[Byte], group: DelayGroup): DelayGroup = {
+          if(path == Nil) group else {
+            val node = group.items(path.head)
+
+            if(node.isInstanceOf[DelayGroup])
+              descend_model(path.tail, node.asInstanceOf[DelayGroup])
+              else throw new InvalidModelPath
+          }
+        }
+        descend_model(intent_path.toList, model)
+      }
+    } catch { case e: InvalidModelPath =>
+      null
+    }
+  }
+
   def save_state {
     def handler[T <: Throwable](e: T) {
       // Log.v("save_state", "Exception happened")

@@ -38,7 +38,7 @@ import model._
 
 
 object ListActivity {
-  private val IntentExtraModelPathByteArray = "MODEL_PATH"
+  private[smart_timer] val IntentExtraModelPathByteArray = "MODEL_PATH"
 
   private val KillBufferActivityRequestCode = 0
 }
@@ -50,22 +50,6 @@ class ListActivity extends Activity {
   private var group_adapter: GroupAdapter = null
 
   private val this_activity = this
-
-  private class InvalidModelPath extends Throwable
-
-  private def get_list_view_visible_items_info(list_view: ListView) = {
-    val first_pos = list_view.getFirstVisiblePosition
-    val last_pos  = list_view.getLastVisiblePosition
-    
-    first_pos to last_pos map { n =>
-      val ch = list_view.getChildAt(n)
-
-      val loc = Array[Int](0, 0)
-      ch.getLocationOnScreen(loc)
-
-      (n, ch, loc(1), ch.getHeight)
-    }
-  }
 
   //////
 
@@ -82,26 +66,11 @@ class ListActivity extends Activity {
     if(intent_path == null) intent_path = Array.empty[Byte]
 
     val model_node = {
-      Log.v("intent_path", intent_path.mkString(","))
+      val cand_model =
+        getApplication.asInstanceOf[MyApplication]
+        .find_model_node(intent_path)
 
-      val model = getApplication.asInstanceOf[MyApplication].model
-
-      try {
-        if(intent_path.isEmpty) model else {
-          @tailrec def descend_model(path: List[Byte], group: DelayGroup): DelayGroup = {
-            if(path == Nil) group else {
-              val node = group.items(path.head)
-
-              if(node.isInstanceOf[DelayGroup])
-                descend_model(path.tail, node.asInstanceOf[DelayGroup])
-                else throw new InvalidModelPath
-            }
-          }
-          descend_model(intent_path.toList, model)
-        }
-      } catch { case e: InvalidModelPath =>
-        return finish()
-      }
+      if(cand_model == null) return finish(); else cand_model
     }
 
     {
@@ -127,6 +96,20 @@ class ListActivity extends Activity {
       }
 
       private var drop_y: Int = 0
+
+      private def get_list_view_visible_items_info(list_view: ListView) = {
+        val first_pos = list_view.getFirstVisiblePosition
+        val last_pos  = list_view.getLastVisiblePosition
+        
+        first_pos to last_pos map { n =>
+          val ch = list_view.getChildAt(n)
+
+          val loc = Array[Int](0, 0)
+          ch.getLocationOnScreen(loc)
+
+          (n, ch, loc(1), ch.getHeight)
+        }
+      }
 
       def onTouch (v: View, event: MotionEvent): Boolean = {
         if(event.getAction != MotionEvent.ACTION_DOWN) false else {
