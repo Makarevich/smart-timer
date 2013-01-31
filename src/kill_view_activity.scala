@@ -31,19 +31,16 @@ import android.widget._
 import model._
 
 
-class KillViewActivity extends Activity {
+class KillViewActivity extends Activity
+  with ActionBarActivity
+{
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
+    set_action_bar_title(R.string.activity_name_kill_view)
+
     setContentView(R.layout.group_view)
     val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
-
-    {
-      val bar = getActionBar
-      
-      bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
-      bar.setTitle(R.string.activity_name_kill_view)
-    }
 
     val group_adapter = {
       val buffer = getApplication.asInstanceOf[MyApplication].kill_buffer

@@ -21,6 +21,7 @@ package makarevich.smart_timer
 
 import android.app.{Activity,ActionBar}
 import android.content.Intent
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 
@@ -31,9 +32,17 @@ import android.widget._
 import model._
 
 
-class CounterActivity extends Activity {
+class CounterActivity extends Activity
+  with IntentPathActivity
+{
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+
+    setContentView(new View(this) {
+      override def onDraw(canvas: Canvas) {
+        canvas.drawColor(getResources.getColor(R.color.orange))
+      }
+    })
 
     /*
     intent_path = getIntent.getByteArrayExtra(

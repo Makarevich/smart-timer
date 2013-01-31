@@ -29,8 +29,6 @@ import android.graphics.drawable._
 import android.view._
 import android.widget._
 
-import annotation.tailrec
-
 
 import model._
 
@@ -45,8 +43,10 @@ object ListActivity {
 
 
 
-class ListActivity extends Activity {
-  private var intent_path: Array[Byte] = null
+class ListActivity extends Activity
+  with IntentPathActivity
+  with ActionBarActivity
+{
   private var group_adapter: GroupAdapter = null
 
   private val this_activity = this
@@ -56,31 +56,12 @@ class ListActivity extends Activity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
+    group_adapter = new GroupAdapter(this, get_model_node)
+
+    set_action_bar_title(R.string.activity_name_list_view)
+
     setContentView(R.layout.group_view)
     val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
-
-    intent_path = getIntent.getByteArrayExtra(
-      ListActivity.IntentExtraModelPathByteArray
-    )
-
-    if(intent_path == null) intent_path = Array.empty[Byte]
-
-    val model_node = {
-      val cand_model =
-        getApplication.asInstanceOf[MyApplication]
-        .find_model_node(intent_path)
-
-      if(cand_model == null) return finish(); else cand_model
-    }
-
-    {
-      val bar = getActionBar
-      
-      bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
-      bar.setTitle(R.string.activity_name_list_view)
-    }
-
-    group_adapter = new GroupAdapter(this, model_node)
 
     list_view.setAdapter(group_adapter)
 
@@ -341,8 +322,17 @@ class ListActivity extends Activity {
     }
 
     item.getItemId match {
-      case R.id.action_play => toast ("Playing")
+      case R.id.action_play => 
+        val intent = new Intent(this_activity, classOf[CounterActivity])
 
+        intent.putExtra(
+          ListActivity.IntentExtraModelPathByteArray,
+          intent_path
+        )
+
+        startActivity(intent)
+
+        true
 
       case R.id.action_yank =>
         val intent = new Intent(this_activity, classOf[KillViewActivity])
