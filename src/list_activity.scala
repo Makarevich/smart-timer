@@ -272,11 +272,11 @@ class ListActivity extends Activity
         }
 
         item.getItemId match {
-        case R.id.action_copy =>
-          get_checked_positions{ group_adapter cloneItemsAtPositions _ }
-        case R.id.action_cut =>
-          get_checked_positions{ group_adapter killItemsAtPositions _ }
-        case _ => false
+          case R.id.action_copy =>
+            get_checked_positions{ group_adapter cloneItemsAtPositions _ }
+          case R.id.action_cut =>
+            get_checked_positions{ group_adapter killItemsAtPositions _ }
+          case _ => false
         }
       }
 
@@ -316,10 +316,12 @@ class ListActivity extends Activity
   }
 
   override def onOptionsItemSelected(item: MenuItem) = {
+    /*
     def toast(text: String): Boolean = {
       Toast.makeText(this, text, Toast.LENGTH_SHORT).show
       true
     }
+    */
 
     item.getItemId match {
       case R.id.action_play => 

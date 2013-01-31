@@ -21,11 +21,11 @@ package makarevich.smart_timer
 
 import android.app.{Activity,ActionBar}
 import android.content.Intent
-import android.graphics.Canvas
-import android.os.Bundle
+import android.os.{Bundle,Handler}
 import android.util.Log
 
 
+import android.graphics._
 import android.view._
 import android.widget._
 
@@ -35,14 +35,22 @@ import model._
 class CounterActivity extends Activity
   with IntentPathActivity
 {
+  import CounterActivity.AnimatedView
+
+  private val this_activity = this
+
+  private var view: AnimatedView = null
+
+  private def log(s: String) {
+    //Log.v("CounterActivity",s)
+  }
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
-    setContentView(new View(this) {
-      override def onDraw(canvas: Canvas) {
-        canvas.drawColor(getResources.getColor(R.color.orange))
-      }
-    })
+    view = new AnimatedView(this)
+
+    setContentView(view)
 
     /*
     intent_path = getIntent.getByteArrayExtra(
@@ -67,5 +75,78 @@ class CounterActivity extends Activity
     }
     */
   }
+
+  override def onResume {
+    super.onResume
+
+    log("onResume")
+
+    view.run
+  }
+
+  override def onPause {
+    super.onPause
+
+    log("onPause")
+
+    view.stop
+  }
+
 }
 
+object CounterActivity {
+  private class AnimatedView(activity: Activity)
+    extends View(activity)
+    with Runnable
+  {
+    private val handler: Handler = new Handler(activity.getMainLooper)
+
+    private var n = 10
+
+    private def log(s: String) {
+      //Log.v("CounterActivity.AnimatedView",s)
+    }
+
+    private def get_res_color(res_id: Int) = activity.getResources.getColor(res_id)
+
+    override def onDraw(canvas: Canvas) {
+      canvas.drawColor(get_res_color(R.color.orange))
+
+      val paint = new Paint
+
+      paint.setColor(get_res_color(R.color.black))
+      paint.setTextSize(60)
+      paint.setTextAlign(Paint.Align.CENTER)
+      paint.setTypeface(Typeface.DEFAULT_BOLD);
+
+      paint.setShadowLayer(5, 0, 0, get_res_color(R.color.white)); 
+
+      canvas.drawText(n.toString, canvas.getWidth / 2, canvas.getHeight / 2, paint)
+    }
+
+    def run {
+      log("running")
+
+      handler.postDelayed(this, 1000)
+
+      //Toast.makeText(activity, "Tick", Toast.LENGTH_SHORT).show
+
+
+      if(n == 0) {
+        activity.finish
+        return
+      }
+
+      n = n - 1
+
+      invalidate
+    }
+
+    def stop {
+      log("stopping")
+
+      handler.removeCallbacks(this)
+    }
+  }
+
+}

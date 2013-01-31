@@ -34,12 +34,13 @@
   <!--
   <integer name="color_count">8</integer>
 
-  <color name="red">#F88</color>
-  <color name="blue">#88F</color>
   -->
 
   <color name="orange">#883</color>
   <color name="black">#000</color>
+  <color name="red">#F88</color>
+  <color name="blue">#88F</color>
+  <color name="white">#FFF</color>
 
   <array name="colors">
     <item>#FFFF0000</item>
