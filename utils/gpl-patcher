@@ -1,0 +1,41 @@
+#!/bin/zsh
+
+function sign_file () {
+  skip=$1
+  prefix=$2
+  postfix=$3
+  file=$4
+
+  tmp=/tmp/TEMPO
+
+  (
+    head -$skip $file
+    if (( $skip )) ; then print; fi
+    print -- "$prefix"
+    cat /tmp/gpl-copyright.txt
+    print -- "$postfix"
+    print
+    tail -n +$(( $skip + 1 )) "$file"
+  ) >$tmp
+
+  cp $tmp $file
+}
+
+function sign_scala () {
+  sign_file 0 '/*' '*/' $1
+}
+
+function sign_xml () {
+  sign_file 1 '<!--' '-->' $1
+}
+
+#git reset --hard
+
+find src -name '*.scala' | while read; do sign_scala $REPLY; done
+
+find res -name '*.xml' | while read; do sign_xml $REPLY; done
+
+sign_xml custom_rules.xml
+
+cp /tmp/COPYING .
+
