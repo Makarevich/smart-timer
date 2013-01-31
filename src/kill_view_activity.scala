@@ -19,7 +19,7 @@
 
 package makarevich.smart_timer
 
-import android.app.Activity
+import android.app.{Activity,ActionBar}
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -37,6 +37,13 @@ class KillViewActivity extends Activity {
 
     setContentView(R.layout.group_view)
     val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]
+
+    {
+      val bar = getActionBar
+      
+      bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
+      bar.setTitle(R.string.activity_name_kill_view)
+    }
 
     val group_adapter = {
       val buffer = getApplication.asInstanceOf[MyApplication].kill_buffer

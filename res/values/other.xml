@@ -22,6 +22,9 @@
 <resources>
   <string name="app_name">Smart timer</string>
 
+  <string name="activity_name_list_view">List</string>
+  <string name="activity_name_kill_view">Killed</string>
+
 
 
 

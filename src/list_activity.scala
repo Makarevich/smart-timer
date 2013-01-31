@@ -19,7 +19,7 @@
 
 package makarevich.smart_timer
 
-import android.app.Activity
+import android.app.{Activity,ActionBar}
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -102,6 +102,13 @@ class ListActivity extends Activity {
       } catch { case e: InvalidModelPath =>
         return finish()
       }
+    }
+
+    {
+      val bar = getActionBar
+      
+      bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
+      bar.setTitle(R.string.activity_name_list_view)
     }
 
     group_adapter = new GroupAdapter(this, model_node)
