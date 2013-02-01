@@ -1,0 +1,6 @@
+#!/bin/zsh
+inotifywait -m -e close_write .compile_trigger | \
+  while read; do
+    ant debug && ant installd
+    while read -t; do; done
+  done
