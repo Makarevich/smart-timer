@@ -58,6 +58,12 @@ class CounterActivity extends Activity
     state.prepare
 
     setContentView(view)
+
+    view.setOnTouchListener {
+      val sens = getResources.getInteger(R.integer.counter_view_sensitivity)
+
+      new TimerGestureController(state.timer, sens) with Logger
+    }
   }
 
   override def onResume {
@@ -87,10 +93,12 @@ class CounterActivity extends Activity
   }
 
   override def onOptionsItemSelected(item: MenuItem) = {
+    /*
     def toast(text: String): Boolean = {
       Toast.makeText(this, text, Toast.LENGTH_SHORT).show
       true
     }
+    */
     def ok(action: => Unit) = {
       action
       true
@@ -130,10 +138,19 @@ object CounterActivity {
   }
 
   private abstract class AbstractDelayStateMachine(group: DelayGroup) {
+
+    //
+    // Abstract methods
+    //
+
     def update_state(item: DelayItem): Unit
     def state_failure: Unit
 
     //////////
+
+    //
+    // StackFrame
+    //
 
     private object StackFrame {
       def apply(group: DelayGroup): StackFrame = StackFrame(group, group.k, 0)
@@ -252,7 +269,7 @@ object CounterActivity {
       private def prepare_aux = prepare
     }
 
-    /** This automaton's memory stack. */
+    /** This is automaton's memory stack. */
     private val stack = StackFrame(group)
 
     //////////
@@ -318,7 +335,7 @@ object CounterActivity {
       log("running")
       handler.postDelayed(this, 1000)
 
-      if(_n == 0) {
+      if(_n <= 0) {
         state.go_forward
         return
       }
@@ -384,6 +401,53 @@ object CounterActivity {
     def color_= (c: Int) {
       this._c = c
       this.invalidate
+    }
+  }
+
+  private class TimerGestureController(timer: Timer, sens: Int)
+    extends FakeLogger
+    with View.OnTouchListener
+  {
+    private var px: Float = 0
+    private var py: Float = 0
+    private var timer_n: Float = 0
+    
+
+    def onTouch(v: View, event: MotionEvent): Boolean = {
+      def log_coords(prefix: String) = {
+        log(prefix + ": " + event.getX.toString + " " + event.getY.toString)
+        true
+      }
+
+      def memorize_coords {
+        px = event.getX
+        py = event.getY
+
+        timer_n = timer.n
+      }
+
+      event.getAction match {
+        case MotionEvent.ACTION_DOWN =>
+          memorize_coords
+          log_coords("ACTION_DOWN")
+
+        case MotionEvent.ACTION_MOVE =>
+          val delta: Float = (px - event.getX) + (py - event.getY)
+
+          timer_n = timer_n + (delta / sens)
+
+          log("Timer n: " + timer_n.toString)
+
+          timer.n = timer_n.toInt
+
+          memorize_coords
+          log_coords("ACTION_MOVE")
+
+        case MotionEvent.ACTION_UP   => log_coords("ACTION_UP  ")
+
+        case _ => false
+      }
+
     }
   }
 
