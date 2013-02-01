@@ -93,3 +93,20 @@ trait ActionBarActivity extends Activity {
     bar.setTitle(t)
   }
 }
+
+
+/**
+ * A loggin mixins
+ */
+
+trait FakeLogger {
+  def log(msg: String) {
+  }
+}
+
+trait Logger extends FakeLogger {
+  override def log(msg: String) {
+    Log.v(this.getClass.getName, msg)
+  }
+}
+

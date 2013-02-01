@@ -34,21 +34,24 @@ import model._
 
 class CounterActivity extends Activity
   with IntentPathActivity
+  with FakeLogger
 {
-  import CounterActivity.AnimatedView
+  import CounterActivity._
 
   private val this_activity = this
 
-  private var view: AnimatedView = null
+  private var timer: Timer = null
 
-  private def log(s: String) {
-    //Log.v("CounterActivity",s)
-  }
+  //
+  // Lifecycle
+  //
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
-    view = new AnimatedView(this)
+    val view = new AnimatedView(this)
+
+    timer = new Timer(this, view)
 
     setContentView(view)
   }
@@ -58,7 +61,7 @@ class CounterActivity extends Activity
 
     log("onResume")
 
-    view.run
+    timer.run
   }
 
   override def onPause {
@@ -66,8 +69,12 @@ class CounterActivity extends Activity
 
     log("onPause")
 
-    view.stop
+    timer.stop
   }
+
+  //
+  // Menu handling
+  //
 
   override def onCreateOptionsMenu(menu: Menu) = {
     getMenuInflater.inflate(R.menu.counter_action_bar, menu)
@@ -93,17 +100,15 @@ class CounterActivity extends Activity
 }
 
 object CounterActivity {
+  //////////////////////
+  // AnimatedView
+  //
+
   private class AnimatedView(activity: Activity)
     extends View(activity)
-    with Runnable
+    with FakeLogger
   {
-    private val handler: Handler = new Handler(activity.getMainLooper)
-
-    private var n = 10
-
-    private def log(s: String) {
-      //Log.v("CounterActivity.AnimatedView",s)
-    }
+    private var n: Int = 0
 
     private def get_res_color(res_id: Int) = activity.getResources.getColor(res_id)
 
@@ -122,6 +127,24 @@ object CounterActivity {
       canvas.drawText(n.toString, canvas.getWidth / 2, canvas.getHeight / 2, paint)
     }
 
+    def update_number(n: Int) {
+      this.n = n
+      this.invalidate
+    }
+  }
+
+  //////////////////////
+  // Timer
+  //
+
+  private class Timer(activity: Activity, view: AnimatedView)
+    extends Runnable
+    with FakeLogger
+  {
+    private val handler: Handler = new Handler(activity.getMainLooper)
+
+    private var n = 10
+
     def run {
       log("running")
 
@@ -137,7 +160,7 @@ object CounterActivity {
 
       n = n - 1
 
-      invalidate
+      view.update_number(n)
     }
 
     def stop {
