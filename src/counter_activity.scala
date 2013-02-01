@@ -51,29 +51,6 @@ class CounterActivity extends Activity
     view = new AnimatedView(this)
 
     setContentView(view)
-
-    /*
-    intent_path = getIntent.getByteArrayExtra(
-      ListActivity.IntentExtraModelPathByteArray
-    )
-
-    if(intent_path == null) intent_path = Array.empty[Byte]
-
-    val model_node = {
-      val cand_model =
-        getApplication.asInstanceOf[MyApplication]
-        .find_model_node(intent_path)
-
-      if(cand_model == null) return finish(); else cand_model
-    }
-
-    {
-      val bar = getActionBar
-      
-      bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
-      bar.setTitle(R.string.activity_name_kill_view)
-    }
-    */
   }
 
   override def onResume {
@@ -90,6 +67,27 @@ class CounterActivity extends Activity
     log("onPause")
 
     view.stop
+  }
+
+  override def onCreateOptionsMenu(menu: Menu) = {
+    getMenuInflater.inflate(R.menu.counter_action_bar, menu)
+
+    true
+  }
+
+  override def onOptionsItemSelected(item: MenuItem) = {
+    def toast(text: String): Boolean = {
+      Toast.makeText(this, text, Toast.LENGTH_SHORT).show
+      true
+    }
+
+    item.getItemId match {
+      case R.id.action_rewind       => toast("Rewind")
+      case R.id.action_replay       => toast("Replay")
+      case R.id.action_fast_forward => toast("Fast forward")
+
+      case _ => super.onOptionsItemSelected(item)
+    }
   }
 
 }

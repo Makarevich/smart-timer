@@ -19,17 +19,21 @@
     along with Smart Timer.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<resources>
-  <!-- List activity -->
-  <string name="action_play">Play</string>
-  <string name="action_yank">Yank</string>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/action_rewind"
+        android:icon="@drawable/holo_09_av_rewind"
+        android:title="@string/action_rewind"
+        android:showAsAction="always"
+        />
+  <item android:id="@+id/action_replay"
+        android:icon="@drawable/holo_09_av_replay"
+        android:title="@string/action_replay"
+        android:showAsAction="always"
+        />
+  <item android:id="@+id/action_fast_forward"
+        android:icon="@drawable/holo_09_av_fast_forward"
+        android:title="@string/action_fast_forward"
+        android:showAsAction="always"
+        />
+</menu>
 
-  <string name="action_copy">Copy</string>
-  <string name="action_cut">Cut</string>
-
-
-  <!-- Counter activity -->
-  <string name="action_rewind">Rewind</string>
-  <string name="action_replay">Replay</string>
-  <string name="action_fast_forward">Forward</string>
-</resources>
