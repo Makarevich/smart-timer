@@ -123,54 +123,134 @@ object CounterActivity {
 
     //////////
 
-    private case class StackFrame(index: Int, group: DelayGroup)
+    private object StackFrame {
+      def apply(group: DelayGroup): StackFrame = StackFrame(group, group.k, 0)
+    }
+
+    private case class StackFrame (
+      val group: DelayGroup,
+      var k: Int,
+      var index: Int
+    ) {
+      private var subframe: StackFrame = null
+
+      /**
+       * The following functions return "false",
+       * if the frame becomes invalid.
+       */
+
+      /** "Falls" into for next valid state. */
+      @tailrec
+      final def prepare: Boolean = {
+        if(index >= group.items.size) {
+          assert(k > 0)
+          k = k - 1
+          if(k == 0) {
+            return false
+          }
+          index = 0
+          this.prepare
+        } else {
+          group.items(index) match {
+            case it: DelayItem => true
+
+            case gr: DelayGroup =>
+              assert(subframe == null)
+              subframe = StackFrame(gr)
+              if(!subframe.prepare_aux) {
+                subframe = null
+                index = index + 1
+                this.prepare
+              } else true
+          }
+        }
+      }
+
+      /** Searches for next valid state. */
+      final def next: Boolean = {
+        if(subframe != null) {
+          if(subframe.next) {
+            return true
+          } else {
+            subframe = null
+          }
+        }
+
+        index = index + 1
+        return this.prepare
+      }
+
+      /** Searches for previous valid state. */
+      @tailrec
+      final def prev: Boolean = {
+        if(subframe != null) {
+          if(subframe.prev_aux){
+            return true
+          } else {
+            subframe = null
+          }
+        }
+
+        index = index - 1
+
+        if(index < 0) {
+          k = k + 1
+
+          if(k > group.k) return false
+
+          index = group.items.size
+
+          this.prev
+        } else {
+          group.items(index) match {
+            case it: DelayItem => true
+
+            case gr: DelayGroup =>
+              assert(subframe == null)
+              subframe = StackFrame(gr, 1, gr.items.size)
+              this.prev
+          }
+        }
+      }
+
+      /** Recursively computes current item of the stack. */
+      final def item: DelayItem =
+        if(subframe != null) {
+          subframe.item
+        } else {
+          group.items(index).asInstanceOf[DelayItem]
+        }
+
+      /** Resets this frame to something suitable for 'prepare'. */
+      final def hard_reset {
+        k = group.k
+        index = 0
+      }
+
+      final def print_trace {
+        Log.v("StackFrame", k.toString + "x" + index.toString)
+        if(subframe != null) subframe.print_trace
+      }
+
+
+
+      /** Auxilliary helpers to assist tailrec methods. */
+      private def prev_aux = prev
+      private def prepare_aux = prepare
+    }
 
     /** This automaton's memory stack. */
-    private var stack =
-      collection.mutable.ArrayStack.apply(StackFrame(0, group))
+    private val stack = StackFrame(group)
 
-    /** Offset of the current delay item. */
-    private var offset: Int = 0
+    stack.prepare
 
     //////////
 
-    private def set_up_valid_state(item: DelayItem) {
-      timer.n = item.amount
-      view.color = item.color
-    }
-
-    @tailrec private def search_valid_state
-      (reset_offset: DelayGroup => Unit)
-      (check_offset_bounds: DelayGroup => Boolean)
-      (step_offset: => Unit)
-      (invalid_handler: => Unit)
-    {
-      val group = stack.top.group
-
-      if(check_offset_bounds(group)) {
-        val prev_frame = stack.pop
-
-        offset = prev_frame.index
-
-        if(stack.isEmpty) {
-          invalid_handler
-        } else {
-          step_offset
-          search_valid_state(reset_offset)(check_offset_bounds)(
-            step_offset)(invalid_handler)
-        }
-      } else {
-        group.items(offset) match {
-          case gr: DelayGroup =>
-            stack.push(StackFrame(offset, gr))
-            reset_offset(gr)
-            search_valid_state(reset_offset)(check_offset_bounds)(
-              step_offset)(invalid_handler)
-
-          case it: DelayItem =>
-            set_up_valid_state(it)
-        }
-      }
+    private def set_up_valid_state (advance_result: Boolean) (on_failure: => Unit) {
+      if(advance_result) {
+        timer.n = stack.item.amount
+        view.color = stack.item.color
+      } else on_failure
     }
 
     /** "Falls" forwards into the nearest valid state.
@@ -178,15 +258,7 @@ object CounterActivity {
      * to that state. Otherwise, finishes the activity.
      */
     def reset {
-      search_valid_state {
-        gr => offset = 0
-      } {
-        gr => offset >= gr.items.size
-      } { 
-        offset = offset + 1
-      } {
-        activity.finish
-      }
+      set_up_valid_state (true) ()
     }
 
     /** Scans for the previous valid state.
@@ -194,20 +266,9 @@ object CounterActivity {
      * the machine info the first valid state.
      */
     def go_backwards {
-      offset = offset - 1
-
-      search_valid_state {
-        gr => offset = gr.items.size - 1
-      } {
-        gr => offset < 0
-      } { 
-        offset = offset - 1
-      } {
-        stack.clear
-        stack.push(StackFrame(0, group))
-        offset = 0
-
-        reset
+      set_up_valid_state (stack.prev) {
+        stack.hard_reset
+        stack.prepare
       }
     }
 
@@ -215,8 +276,11 @@ object CounterActivity {
      * Basically, increments 'offset' and invokes 'reset'.
      */
     def go_forward {
-      offset = offset + 1
-      reset
+      set_up_valid_state (stack.next) {
+        activity.finish
+      }
+
+      stack.print_trace
     }
   }
 
