@@ -31,6 +31,8 @@ private class ColorAdapter (ctxt: Activity) extends BaseAdapter
   private val color_array: Array[Int] = {
     val ta = ctxt.getResources.obtainTypedArray(R.array.colors)
 
+    import scala.language.postfixOps
+
     0 until ta.length map { i =>
       //Log.v("ColorAdapter", "fetching color " + i.toString)
       ta getColor(i, 0)

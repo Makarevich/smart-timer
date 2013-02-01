@@ -44,6 +44,7 @@
 
       <scalac force="changed" deprecation="on"
               srcdir="src" includes="**/*.scala"
+              addparams="-feature"
               destdir="bin/classes">
         <classpath>
           <!-- the android jar, compiled resources, and scala libs -->

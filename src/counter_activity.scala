@@ -130,6 +130,38 @@ object CounterActivity {
 
     //////////
 
+    @tailrec def search_valid_state
+      (reset_offset: => Unit)
+      (check_offset_bounds: DelayGroup => Boolean)
+      (step_offset: => Unit)
+      (setup_everything: DelayItem => Unit)
+    {
+      val group = stack.top.group
+
+      if(check_offset_bounds(group)) {
+        val prev_frame = stack.pop
+
+        offset = prev_frame.index
+
+        if(stack.isEmpty) {
+          activity.finish
+        } else {
+          step_offset
+          search_valid_state
+        }
+      } else {
+        group.items(offset) match {
+          case gr: DelayGroup =>
+            stack.push(StackFrame(offset, gr))
+            reset_offset
+            search_valid_state
+
+          case it: DelayItem =>
+            setup_everything(it)
+        }
+      }
+    }
+
     /** "Falls" forwards into the nearest valid state.
      * If it finds a valid state, sets up 'timer' and 'view' according
      * to that state. Otherwise, finishes the activity.
@@ -167,7 +199,13 @@ object CounterActivity {
         }
       }
 
-      search_valid_state
+      search_valid_stat
+        (offset = 0)
+        (offset >= _.items.size)(offset = offset + 1) {
+        timer.n = item.amount
+        view.color = item.color
+      }
+
     }
 
     /** Scans for the previous valid state.
