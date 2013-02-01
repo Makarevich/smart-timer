@@ -91,11 +91,15 @@ class CounterActivity extends Activity
       Toast.makeText(this, text, Toast.LENGTH_SHORT).show
       true
     }
+    def ok(action: => Unit) = {
+      action
+      true
+    }
 
     item.getItemId match {
-      case R.id.action_rewind       => toast("Rewind")
-      case R.id.action_replay       => toast("Replay")
-      case R.id.action_fast_forward => toast("Fast forward")
+      case R.id.action_rewind       => ok(state.go_backwards)
+      case R.id.action_replay       => ok(state.reset)
+      case R.id.action_fast_forward => ok(state.go_forward)
 
       case _ => super.onOptionsItemSelected(item)
     }
@@ -130,11 +134,16 @@ object CounterActivity {
 
     //////////
 
-    @tailrec def search_valid_state
-      (reset_offset: => Unit)
+    private def set_up_valid_state(item: DelayItem) {
+      timer.n = item.amount
+      view.color = item.color
+    }
+
+    @tailrec private def search_valid_state
+      (reset_offset: DelayGroup => Unit)
       (check_offset_bounds: DelayGroup => Boolean)
       (step_offset: => Unit)
-      (setup_everything: DelayItem => Unit)
+      (invalid_handler: => Unit)
     {
       val group = stack.top.group
 
@@ -144,20 +153,22 @@ object CounterActivity {
         offset = prev_frame.index
 
         if(stack.isEmpty) {
-          activity.finish
+          invalid_handler
         } else {
           step_offset
-          search_valid_state
+          search_valid_state(reset_offset)(check_offset_bounds)(
+            step_offset)(invalid_handler)
         }
       } else {
         group.items(offset) match {
           case gr: DelayGroup =>
             stack.push(StackFrame(offset, gr))
-            reset_offset
-            search_valid_state
+            reset_offset(gr)
+            search_valid_state(reset_offset)(check_offset_bounds)(
+              step_offset)(invalid_handler)
 
           case it: DelayItem =>
-            setup_everything(it)
+            set_up_valid_state(it)
         }
       }
     }
@@ -167,45 +178,15 @@ object CounterActivity {
      * to that state. Otherwise, finishes the activity.
      */
     def reset {
-      def setup_everything(item: DelayItem) {
-        timer.n = item.amount
-        view.color = item.color
+      search_valid_state {
+        gr => offset = 0
+      } {
+        gr => offset >= gr.items.size
+      } { 
+        offset = offset + 1
+      } {
+        activity.finish
       }
-
-      @tailrec def search_valid_state {
-        val group = stack.top.group
-
-        if(offset >= group.items.size) {
-          val prev_frame = stack.pop
-
-          offset = prev_frame.index
-
-          if(stack.isEmpty) {
-            activity.finish
-          } else {
-            offset = offset + 1
-            search_valid_state
-          }
-        } else {
-          group.items(offset) match {
-            case gr: DelayGroup =>
-              stack.push(StackFrame(offset, gr))
-              offset = 0
-              search_valid_state
-
-            case it: DelayItem =>
-              setup_everything(it)
-          }
-        }
-      }
-
-      search_valid_stat
-        (offset = 0)
-        (offset >= _.items.size)(offset = offset + 1) {
-        timer.n = item.amount
-        view.color = item.color
-      }
-
     }
 
     /** Scans for the previous valid state.
@@ -213,6 +194,21 @@ object CounterActivity {
      * the machine info the first valid state.
      */
     def go_backwards {
+      offset = offset - 1
+
+      search_valid_state {
+        gr => offset = gr.items.size - 1
+      } {
+        gr => offset < 0
+      } { 
+        offset = offset - 1
+      } {
+        stack.clear
+        stack.push(StackFrame(0, group))
+        offset = 0
+
+        reset
+      }
     }
 
     /** Scans for the next valid state.
