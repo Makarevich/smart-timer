@@ -42,7 +42,7 @@ class CounterActivity extends Activity
 
   private val this_activity = this
 
-  private var state: StateMachine = null
+  private var state: ConcreteStateMachine = null
 
   //
   // Lifecycle
@@ -53,9 +53,9 @@ class CounterActivity extends Activity
 
     val view = new AnimatedView(this)
 
-    state = new StateMachine(get_model_node, this, view)
+    state = new ConcreteStateMachine(get_model_node, this, view)
 
-    state.reset
+    state.prepare
 
     setContentView(view)
   }
@@ -97,8 +97,8 @@ class CounterActivity extends Activity
     }
 
     item.getItemId match {
-      case R.id.action_rewind       => ok(state.go_backwards)
       case R.id.action_replay       => ok(state.reset)
+      case R.id.action_rewind       => ok(state.go_backwards)
       case R.id.action_fast_forward => ok(state.go_forward)
 
       case _ => super.onOptionsItemSelected(item)
@@ -112,14 +112,26 @@ object CounterActivity {
   // StateMachine
   //
 
-  private class StateMachine(
+  private class ConcreteStateMachine(
     group: DelayGroup,
-
     activity: Activity,
     view: AnimatedView
-    )
-  {
+  ) extends AbstractDelayStateMachine(group) {
     val timer = new Timer(activity, this, view)
+
+    def update_state(item: DelayItem) {
+      timer.n = item.amount
+      view.color = item.color
+    }
+
+    def state_failure {
+      activity.finish
+    }
+  }
+
+  private abstract class AbstractDelayStateMachine(group: DelayGroup) {
+    def update_state(item: DelayItem): Unit
+    def state_failure: Unit
 
     //////////
 
@@ -223,6 +235,7 @@ object CounterActivity {
 
       /** Resets this frame to something suitable for 'prepare'. */
       final def hard_reset {
+        assert(subframe == null)
         k = group.k
         index = 0
       }
@@ -242,23 +255,24 @@ object CounterActivity {
     /** This automaton's memory stack. */
     private val stack = StackFrame(group)
 
-    stack.prepare
-
     //////////
 
     private def set_up_valid_state (advance_result: Boolean) (on_failure: => Unit) {
       if(advance_result) {
-        timer.n = stack.item.amount
-        view.color = stack.item.color
+        update_state(stack.item)
       } else on_failure
     }
 
-    /** "Falls" forwards into the nearest valid state.
-     * If it finds a valid state, sets up 'timer' and 'view' according
-     * to that state. Otherwise, finishes the activity.
-     */
+    /** Initializes the state machine. May invoke state_failure. */
+    def prepare {
+      set_up_valid_state (stack.prepare) {
+        state_failure
+      }
+    }
+
+    /** Efectively, updates current state. */
     def reset {
-      set_up_valid_state (true) ()
+      update_state(stack.item)
     }
 
     /** Scans for the previous valid state.
@@ -277,10 +291,10 @@ object CounterActivity {
      */
     def go_forward {
       set_up_valid_state (stack.next) {
-        activity.finish
+        state_failure
       }
 
-      stack.print_trace
+      // stack.print_trace
     }
   }
 
@@ -290,7 +304,7 @@ object CounterActivity {
 
   private class Timer(
     activity: Activity,
-    state: StateMachine,
+    state: AbstractDelayStateMachine,
     view: AnimatedView
   )
     extends Runnable
