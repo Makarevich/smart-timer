@@ -80,16 +80,33 @@ class ListActivity extends Activity
       private var drop_y: Int = 0
 
       private def get_list_view_visible_items_info(list_view: ListView) = {
-        val first_pos = list_view.getFirstVisiblePosition
-        val last_pos  = list_view.getLastVisiblePosition
+        val hdr_count = list_view.getHeaderViewsCount
+        val cld_count = list_view.getChildCount
         
-        first_pos to last_pos map { n =>
+        hdr_count until cld_count map { n =>
           val ch = list_view.getChildAt(n)
+
+          assert(ch != null)
+
+          val pos = list_view.getPositionForView(ch)
+
+          assert(pos != AdapterView.INVALID_POSITION)
+
+          /*
+          Log.v("get_list_view_visible_items_info",
+            "Fetched child pos " + pos.toString)
+          */
 
           val loc = Array[Int](0, 0)
           ch.getLocationOnScreen(loc)
 
-          (n, ch, loc(1), ch.getHeight)
+          /*
+          Log.v("get_list_view_visible_items_info",
+            "Got location of child " + pos.toString + ": " + 
+            loc.mkString(","))
+          */
+
+          (pos, ch, loc(1), ch.getHeight)
         }
       }
 
@@ -112,10 +129,12 @@ class ListActivity extends Activity
                 y <= ey && ey <= (y + dy)
             }
 
-            // Log.v("onTouch", "Found a child: " + selected_child.toString)
+            Log.v("onTouch", "Generated selected_info: " + selected_info.toString)
 
             if(selected_info.isEmpty) false else {
               val (n, ch, y, dy) = selected_info.get
+
+              Log.v("onTouch", "Found a child: " + n.toString)
 
               val shadow_x = event.getRawX.toInt
               val shadow_y = (ey - y).toInt
