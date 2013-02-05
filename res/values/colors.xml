@@ -20,24 +20,28 @@
 -->
 
 <resources>
-  <string name="app_name">Smart timer</string>
+  <!--
+  <integer name="color_count">8</integer>
 
-  <string name="activity_name_list_view">List</string>
-  <string name="activity_name_kill_view">Killed</string>
+  -->
 
+  <color name="orange">#883</color>
+  <color name="black">#000</color>
+  <color name="red">#F88</color>
+  <color name="blue">#88F</color>
+  <color name="white">#FFF</color>
 
+  <array name="colors">
+    <item>#FF33B5E5</item>
+    <item>#FFAA66CC</item>
+    <item>#FF99CC00</item>
+    <item>#FFFFBB33</item>
+    <item>#FFFF4444</item>
+    <item>#FF0099CC</item>
+    <item>#FF9933CC</item>
+    <item>#FF669900</item>
+    <item>#FFFF8800</item>
+    <item>#FFCC0000</item>
+  </array>
 
-
-  <dimen name="color_box_size">50dp</dimen>
-  <dimen name="color_box_margin">10dp</dimen>
-
-  <string name="kill_buffer">Kill buffer</string>
-
-
-
-
-  <integer name="max_group_k">10</integer>
-  <integer name="max_delay">120</integer>
-
-  <integer name="counter_view_sensitivity">20</integer>
 </resources>
