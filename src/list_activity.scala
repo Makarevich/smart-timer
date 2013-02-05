@@ -58,7 +58,8 @@ class ListActivity extends Activity
 
     group_adapter = new GroupAdapter(this, get_model_node)
 
-    set_action_bar_title(R.string.activity_name_list_view)
+    // set_action_bar_title(R.string.activity_name_list_view)
+    set_action_bar_title(("" +: intent_path.toList).mkString("~"))
 
     setContentView(R.layout.group_view)
     val list_view = findViewById(R.id.list_view).asInstanceOf[ListView]

@@ -86,12 +86,17 @@ trait IntentPathActivity extends Activity {
  * A convenience trait to operate with the action bar.
  */
 trait ActionBarActivity extends Activity {
-  protected def set_action_bar_title(t: Int) {
+  private def display_action_bar = {
     val bar = getActionBar
-    
     bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE)
-    bar.setTitle(t)
+    bar
   }
+
+  protected def set_action_bar_title(t: Int): Unit =
+    display_action_bar.setTitle(t)
+
+  protected def set_action_bar_title(t: CharSequence): Unit =
+    display_action_bar.setTitle(t)
 }
 
 
