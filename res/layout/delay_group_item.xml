@@ -35,7 +35,7 @@
     android:layout_marginRight="@dimen/color_box_margin"
     android:layout_marginBottom="@dimen/color_box_margin"
     android:scaleType="fitXY"
-    android:background="@drawable/holo_05_content_email"
+    android:background="@drawable/holo_04_collections_collection"
     />
 
   <TextView
