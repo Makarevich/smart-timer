@@ -40,7 +40,16 @@ object MyApplication {
 class MyApplication extends Application {
   val model: DelayGroup = DelayGroup(1, ArrayBuffer.empty)
 
-  val kill_buffer = DelayGroup(1, ArrayBuffer.empty)
+  val kill_buffer = DelayGroup(1, ArrayBuffer(
+    DelayItem(10, 0),
+    DelayGroup(3, ArrayBuffer(
+    )),
+    DelayItem(20, 0),
+    DelayGroup(1, ArrayBuffer(
+      DelayItem(10, 0),
+      DelayItem(20, 0)
+    ))
+  ))
 
   override def onCreate {
     super.onCreate
