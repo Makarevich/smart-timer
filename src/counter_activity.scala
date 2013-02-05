@@ -20,8 +20,8 @@
 package makarevich.smart_timer
 
 import android.app.{Activity,ActionBar}
-import android.content.Intent
-import android.os.{Bundle,Handler}
+import android.content.{Context,Intent}
+import android.os.{Bundle,Handler,Vibrator}
 import android.util.Log
 
 
@@ -327,7 +327,13 @@ object CounterActivity {
     extends Runnable
     with FakeLogger
   {
-    private val handler: Handler = new Handler(activity.getMainLooper)
+    private val handler: Handler =
+      new Handler(activity.getMainLooper)
+
+    private val vibrator: Vibrator = activity
+      .getSystemService(Context.VIBRATOR_SERVICE).asInstanceOf[Vibrator]
+
+    private val vibra_ticks = Set[Int](1, 2, 3, 5, 8, 11)
 
     private var _n: Int = 0
 
@@ -343,6 +349,10 @@ object CounterActivity {
       _n = _n - 1
 
       view.n = _n
+
+      if(vibra_ticks.contains(_n)) {
+        vibrator.vibrate(500)
+      }
     }
 
     def stop {
