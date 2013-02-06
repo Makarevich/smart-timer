@@ -341,12 +341,12 @@ object CounterActivity {
       log("running")
       handler.postDelayed(this, 1000)
 
+      _n = _n - 1
+
       if(_n <= 0) {
         state.go_forward
         return
       }
-
-      _n = _n - 1
 
       view.n = _n
 
@@ -403,7 +403,7 @@ object CounterActivity {
 
     def n = _n
     def n_= (n: Int) {
-      this._n = n + 1
+      this._n = n
       this.invalidate
     }
 
