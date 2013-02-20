@@ -21,7 +21,8 @@ package makarevich.smart_timer
 
 import android.app.{Activity,ActionBar}
 import android.content.{Context,Intent}
-import android.os.{Bundle,Handler,Vibrator}
+import android.media.MediaPlayer
+import android.os.{Bundle,Handler,PowerManager}
 import android.util.Log
 
 
@@ -44,6 +45,15 @@ class CounterActivity extends Activity
 
   private var state: ConcreteStateMachine = null
 
+  private class ScreenLocker(ctxt: Activity) {
+    val lock = ctxt
+      .getSystemService(Context.POWER_SERVICE)
+      .asInstanceOf[PowerManager]
+      .newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "CounterActivity");
+  }
+
+  private var screen_locker: ScreenLocker = null
+
   //
   // Lifecycle
   //
@@ -53,9 +63,17 @@ class CounterActivity extends Activity
 
     val view = new AnimatedView(this)
 
+    ///
+
     state = new ConcreteStateMachine(get_model_node, this, view)
 
     state.prepare
+
+    ////
+
+    screen_locker = new ScreenLocker(this)
+
+    ////
 
     setContentView(view)
 
@@ -71,7 +89,9 @@ class CounterActivity extends Activity
 
     log("onResume")
 
-    state.timer.run
+    state.timer.start
+
+    screen_locker.lock.acquire
   }
 
   override def onPause {
@@ -80,6 +100,8 @@ class CounterActivity extends Activity
     log("onPause")
 
     state.timer.stop
+
+    screen_locker.lock.release
   }
 
   //
@@ -330,12 +352,22 @@ object CounterActivity {
     private val handler: Handler =
       new Handler(activity.getMainLooper)
 
+    /*
     private val vibrator: Vibrator = activity
       .getSystemService(Context.VIBRATOR_SERVICE).asInstanceOf[Vibrator]
+    */
 
-    private val vibra_ticks = Set[Int](1, 2, 3, 5, 8, 11)
+    private var beeper: MediaPlayer = null
+
+    private val vibra_ticks = Set[Int](1, 2, 3, 4, 5, 7, 9)
 
     private var _n: Int = 0
+
+    def start {
+      beeper = MediaPlayer.create(activity, R.raw.beep)
+
+      run
+    }
 
     def run {
       log("running")
@@ -351,7 +383,10 @@ object CounterActivity {
       view.n = _n
 
       if(vibra_ticks.contains(_n)) {
-        vibrator.vibrate(500)
+        // vibrator.vibrate(500)
+        beeper.stop
+        beeper.prepare
+        beeper.start
       }
     }
 
@@ -359,6 +394,9 @@ object CounterActivity {
       log("stopping")
 
       handler.removeCallbacks(this)
+
+      beeper.release
+      beeper = null
     }
 
     def n = _n
